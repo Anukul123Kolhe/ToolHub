@@ -7,6 +7,8 @@ on:
 
 permissions:
   contents: write
+  pages: write
+  id-token: write
 
 concurrency:
   group: 'pages'
@@ -15,6 +17,9 @@ concurrency:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -36,3 +41,19 @@ jobs:
         with:
           folder: dist
           branch: gh-pages
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+        continue-on-error: true
+
+      - name: Upload GitHub Pages Artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+        continue-on-error: true
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+        continue-on-error: true
+
