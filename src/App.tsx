@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider } from './context/ThemeContext';
 import { StorageProvider } from './context/StorageContext';
 import { Header } from './components/layout/Header';
@@ -84,9 +84,9 @@ export const App: React.FC = () => {
   return (
     <ThemeProvider>
       <StorageProvider>
-        <BrowserRouter>
+        <HashRouter>
           <AppContent />
-        </BrowserRouter>
+        </HashRouter>
       </StorageProvider>
     </ThemeProvider>
   );
