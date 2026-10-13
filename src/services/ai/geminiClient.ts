@@ -1,29 +1,63 @@
 import { TOOLS } from '../../config/tools';
 
+export interface GeminiModelOption {
+  id: string;
+  name: string;
+  isLatest?: boolean;
+}
+
+export const AVAILABLE_GEMINI_MODELS: GeminiModelOption[] = [
+  { id: 'gemini-2.0-flash', name: 'Gemini 2.0 Flash (Latest & Fast)', isLatest: true },
+  { id: 'gemini-2.0-flash-lite', name: 'Gemini 2.0 Flash Lite (Ultra Fast)', isLatest: true },
+  { id: 'gemini-2.0-pro-exp-02-05', name: 'Gemini 2.0 Pro Exp (Complex Reasoning)', isLatest: true },
+  { id: 'gemini-1.5-flash', name: 'Gemini 1.5 Flash (Standard)' },
+  { id: 'gemini-1.5-pro', name: 'Gemini 1.5 Pro (High Context)' },
+];
+
+export const DEFAULT_GEMINI_MODEL = 'gemini-2.0-flash';
+
+export function getEffectiveApiKey(): string {
+  return (
+    (typeof import.meta !== 'undefined' && (import.meta as any).env?.VITE_GEMINI_API_KEY) ||
+    (typeof localStorage !== 'undefined' ? localStorage.getItem('toolhub_gemini_api_key') : '') ||
+    ''
+  );
+}
+
+export function saveEffectiveApiKey(key: string): void {
+  if (typeof localStorage !== 'undefined') {
+    localStorage.setItem('toolhub_gemini_api_key', key.trim());
+  }
+}
+
+export function clearEffectiveApiKey(): void {
+  if (typeof localStorage !== 'undefined') {
+    localStorage.removeItem('toolhub_gemini_api_key');
+  }
+}
+
 const GEMINI_SYSTEM_INSTRUCTION = `
-You are ToolHub Assistant, an expert AI utility consultant for ToolHub (a privacy-first, 100% in-browser online utility platform).
-You help users find, understand, and use online tools for PDF editing, image processing, student GPA/attendance calculations, developer formatting, everyday calculations, and file utilities.
+You are ToolHub Assistant, a smart, concise AI assistant for ToolHub (an all-in-one privacy-first online utility platform).
+ToolHub contains 140+ utilities spanning PDF editing, image conversion, developer utilities, academic calculators, and file converters.
 
 Core Platform Principles:
-1. All file tools process files 100% locally in the browser memory (Zero server uploads).
-2. Recommend the exact ToolHub tool with its path when relevant.
+1. All file tools process files 100% locally in browser memory (zero server transmission).
+2. Recommend the exact ToolHub tool with its URL path when relevant (e.g. [Tool Name](/tool/tool-id)).
+3. Keep answers clean, direct, and actionable.
 
-Key Available Tools on ToolHub:
-${TOOLS.slice(0, 50).map((t) => `- ${t.name} (ID: ${t.id}, Path: ${t.path}): ${t.shortDescription || t.description}`).join('\n')}
-...and over 100 other utilities.
-
-Guidelines:
-- Be concise, helpful, and friendly.
-- When recommending a tool, provide the tool name and markdown link, for example: [Image Exact Size Compressor](/tool/image-exact-size).
-- For mathematical or GPA calculations, explain the formulas clearly.
+Key Implemented Tools on ToolHub:
+${TOOLS.slice(0, 60).map((t) => `- ${t.name} (Path: ${t.path}): ${t.shortDescription || t.description}`).join('\n')}
+...and 80+ other tools.
 `;
 
 export async function callGeminiApi(
   apiKey: string,
   userMessage: string,
-  conversationHistory: { role: 'user' | 'model'; text: string }[] = []
+  conversationHistory: { role: 'user' | 'model'; text: string }[] = [],
+  model: string = DEFAULT_GEMINI_MODEL
 ): Promise<string> {
-  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey.trim()}`;
+  const chosenModel = model.trim() || DEFAULT_GEMINI_MODEL;
+  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${chosenModel}:generateContent?key=${apiKey.trim()}`;
 
   const contents = [
     ...conversationHistory.map((item) => ({
@@ -43,7 +77,7 @@ export async function callGeminiApi(
     contents,
     generationConfig: {
       temperature: 0.7,
-      maxOutputTokens: 1000,
+      maxOutputTokens: 1200,
     },
   };
 
@@ -58,14 +92,14 @@ export async function callGeminiApi(
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
     const errorMsg = errorData?.error?.message || `HTTP ${response.status}: ${response.statusText}`;
-    throw new Error(`Gemini API Error: ${errorMsg}`);
+    throw new Error(errorMsg);
   }
 
   const data = await response.json();
   const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
 
   if (!text) {
-    throw new Error('Gemini API returned an empty response.');
+    throw new Error('No response returned from the model.');
   }
 
   return text;
