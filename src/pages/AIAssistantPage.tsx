@@ -11,47 +11,30 @@ import { Breadcrumbs } from '../components/layout/Breadcrumbs';
 import {
   callGeminiApi,
   getEffectiveApiKey,
-  saveEffectiveApiKey,
   getPreferredModel,
 } from '../services/ai/geminiClient';
 import { resolveNaturalLanguageIntent } from '../services/ai/aiService';
 import { ChatMessageItem, ChatMessage } from '../components/ai/ChatMessageItem';
 
 export const AIAssistantPage: React.FC = () => {
-  const [apiKey, setApiKey] = useState<string>(() => getEffectiveApiKey());
   const [selectedModel, setSelectedModel] = useState<string>(() => getPreferredModel());
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputText, setInputText] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [pendingPrompt, setPendingPrompt] = useState<string | null>(null);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
-    setApiKey(getEffectiveApiKey());
     setSelectedModel(getPreferredModel());
   }, []);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isLoading]);
-
-  const handleSaveInlineKey = (keyVal: string) => {
-    const trimmed = keyVal.trim();
-    if (!trimmed) return;
-    saveEffectiveApiKey(trimmed);
-    setApiKey(trimmed);
-
-    const promptToSend = pendingPrompt;
-    setPendingPrompt(null);
-    if (promptToSend) {
-      sendMessage(promptToSend, trimmed);
-    }
-  };
 
   const handleCopyMessage = (id: string, text: string) => {
     navigator.clipboard.writeText(text);
@@ -64,8 +47,7 @@ export const AIAssistantPage: React.FC = () => {
 
     try {
       const history = messages
-        .filter((m) => !m.isKeyPrompt)
-        .slice(-8)
+        .slice(-6)
         .map((m) => ({
           role: (m.sender === 'user' ? 'user' : 'model') as 'user' | 'model',
           text: m.text,
@@ -79,7 +61,7 @@ export const AIAssistantPage: React.FC = () => {
       );
 
       setMessages((prev) => [
-        ...prev.filter((m) => !m.isKeyPrompt),
+        ...prev,
         {
           id: `assistant-${Date.now()}`,
           sender: 'assistant',
@@ -118,26 +100,7 @@ export const AIAssistantPage: React.FC = () => {
     setMessages((prev) => [...prev, userMsg]);
     if (!customText) setInputText('');
 
-    const currentKey = apiKey || getEffectiveApiKey();
-
-    if (!currentKey) {
-      setIsLoading(true);
-      setTimeout(() => {
-        const fallback = resolveNaturalLanguageIntent(text);
-        setMessages((prev) => [
-          ...prev,
-          {
-            id: `assistant-${Date.now()}`,
-            sender: 'assistant',
-            text: fallback.message,
-            timestamp: Date.now(),
-          },
-        ]);
-        setIsLoading(false);
-      }, 350);
-      return;
-    }
-
+    const currentKey = getEffectiveApiKey();
     await sendMessage(text, currentKey);
   };
 
@@ -180,7 +143,7 @@ export const AIAssistantPage: React.FC = () => {
               type="button"
               onClick={() => navigate('/settings')}
               className="p-1.5 rounded-lg text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-              title="Settings & API Key"
+              title="Settings"
             >
               <Settings className="w-4 h-4" />
             </button>
@@ -227,7 +190,6 @@ export const AIAssistantPage: React.FC = () => {
               key={msg.id}
               message={msg}
               onNavigateTool={(path) => navigate(path)}
-              onSaveKey={handleSaveInlineKey}
               onCopy={handleCopyMessage}
               isCopied={copiedId === msg.id}
               onOpenSettings={() => navigate('/settings')}

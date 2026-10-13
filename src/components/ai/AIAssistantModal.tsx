@@ -10,7 +10,6 @@ import {
 import {
   callGeminiApi,
   getEffectiveApiKey,
-  saveEffectiveApiKey,
   getPreferredModel,
 } from '../../services/ai/geminiClient';
 import { resolveNaturalLanguageIntent } from '../../services/ai/aiService';
@@ -22,14 +21,12 @@ interface AIAssistantModalProps {
 }
 
 export const AIAssistantModal: React.FC<AIAssistantModalProps> = ({ isOpen, onClose }) => {
-  const [apiKey, setApiKey] = useState<string>(() => getEffectiveApiKey());
   const [selectedModel, setSelectedModel] = useState<string>(() => getPreferredModel());
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputText, setInputText] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [pendingPrompt, setPendingPrompt] = useState<string | null>(null);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -37,7 +34,6 @@ export const AIAssistantModal: React.FC<AIAssistantModalProps> = ({ isOpen, onCl
 
   useEffect(() => {
     if (isOpen) {
-      setApiKey(getEffectiveApiKey());
       setSelectedModel(getPreferredModel());
       setTimeout(() => inputRef.current?.focus(), 100);
     }
@@ -46,19 +42,6 @@ export const AIAssistantModal: React.FC<AIAssistantModalProps> = ({ isOpen, onCl
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isLoading]);
-
-  const handleSaveInlineKey = (keyVal: string) => {
-    const trimmed = keyVal.trim();
-    if (!trimmed) return;
-    saveEffectiveApiKey(trimmed);
-    setApiKey(trimmed);
-
-    const promptToSend = pendingPrompt;
-    setPendingPrompt(null);
-    if (promptToSend) {
-      sendMessage(promptToSend, trimmed);
-    }
-  };
 
   const handleCopyMessage = (id: string, text: string) => {
     navigator.clipboard.writeText(text);
@@ -71,8 +54,7 @@ export const AIAssistantModal: React.FC<AIAssistantModalProps> = ({ isOpen, onCl
 
     try {
       const history = messages
-        .filter((m) => !m.isKeyPrompt)
-        .slice(-8)
+        .slice(-6)
         .map((m) => ({
           role: (m.sender === 'user' ? 'user' : 'model') as 'user' | 'model',
           text: m.text,
@@ -86,7 +68,7 @@ export const AIAssistantModal: React.FC<AIAssistantModalProps> = ({ isOpen, onCl
       );
 
       setMessages((prev) => [
-        ...prev.filter((m) => !m.isKeyPrompt),
+        ...prev,
         {
           id: `assistant-${Date.now()}`,
           sender: 'assistant',
@@ -125,26 +107,7 @@ export const AIAssistantModal: React.FC<AIAssistantModalProps> = ({ isOpen, onCl
     setMessages((prev) => [...prev, userMsg]);
     if (!customText) setInputText('');
 
-    const currentKey = apiKey || getEffectiveApiKey();
-
-    if (!currentKey) {
-      setIsLoading(true);
-      setTimeout(() => {
-        const fallback = resolveNaturalLanguageIntent(text);
-        setMessages((prev) => [
-          ...prev,
-          {
-            id: `assistant-${Date.now()}`,
-            sender: 'assistant',
-            text: fallback.message,
-            timestamp: Date.now(),
-          },
-        ]);
-        setIsLoading(false);
-      }, 350);
-      return;
-    }
-
+    const currentKey = getEffectiveApiKey();
     await sendMessage(text, currentKey);
   };
 
@@ -198,7 +161,7 @@ export const AIAssistantModal: React.FC<AIAssistantModalProps> = ({ isOpen, onCl
                   navigate('/settings');
                 }}
                 className="p-1.5 rounded-lg text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-                title="Settings & API Key"
+                title="Settings"
               >
                 <Settings className="w-4 h-4" />
               </button>
@@ -258,7 +221,6 @@ export const AIAssistantModal: React.FC<AIAssistantModalProps> = ({ isOpen, onCl
                   onClose();
                   navigate(path);
                 }}
-                onSaveKey={handleSaveInlineKey}
                 onCopy={handleCopyMessage}
                 isCopied={copiedId === msg.id}
                 onOpenSettings={() => {

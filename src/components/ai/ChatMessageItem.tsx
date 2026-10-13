@@ -28,7 +28,6 @@ export interface ChatMessage {
 interface ChatMessageItemProps {
   message: ChatMessage;
   onNavigateTool: (path: string) => void;
-  onSaveKey?: (key: string) => void;
   onCopy: (id: string, text: string) => void;
   isCopied: boolean;
   onOpenSettings?: () => void;
@@ -51,12 +50,10 @@ const CATEGORY_ICONS: Record<string, React.ComponentType<{ className?: string }>
 export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
   message,
   onNavigateTool,
-  onSaveKey,
   onCopy,
   isCopied,
   onOpenSettings,
 }) => {
-  const [inlineKey, setInlineKey] = useState('');
   const [copiedCodeBlockIdx, setCopiedCodeBlockIdx] = useState<number | null>(null);
   const [showAllTools, setShowAllTools] = useState(false);
 
@@ -376,41 +373,6 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
                   </div>
                 );
               })}
-            </div>
-          </div>
-        )}
-
-        {/* Inline API Key Card if Prompted */}
-        {message.isKeyPrompt && onSaveKey && (
-          <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-2.5 mt-2">
-            <div className="flex items-center gap-2">
-              <input
-                type="password"
-                value={inlineKey}
-                onChange={(e) => setInlineKey(e.target.value)}
-                placeholder="Paste Google Gemini API Key (AIzaSy...)"
-                className="w-full text-xs p-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-sky-500 font-mono"
-              />
-              <button
-                type="button"
-                onClick={() => onSaveKey(inlineKey)}
-                disabled={!inlineKey.trim()}
-                className="px-3.5 py-2 rounded-lg bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-xs font-semibold disabled:opacity-50 transition-opacity shrink-0 shadow-xs"
-              >
-                Connect
-              </button>
-            </div>
-            <div className="flex items-center justify-between text-[11px] text-slate-400">
-              <span>Free key from Google AI Studio</span>
-              {onOpenSettings && (
-                <button
-                  type="button"
-                  onClick={onOpenSettings}
-                  className="text-sky-500 hover:underline font-medium"
-                >
-                  Configure in Settings →
-                </button>
-              )}
             </div>
           </div>
         )}
