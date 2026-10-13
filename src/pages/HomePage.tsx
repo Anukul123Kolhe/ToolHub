@@ -28,6 +28,7 @@ import { Badge } from '../components/common/Badge';
 
 interface HomePageProps {
   onOpenSearch: () => void;
+  onOpenAIAssistant?: () => void;
 }
 
 const CATEGORY_ICONS: Record<ToolCategory, React.ComponentType<{ className?: string }>> = {
@@ -44,7 +45,7 @@ const CATEGORY_ICONS: Record<ToolCategory, React.ComponentType<{ className?: str
   advanced: Sparkles,
 };
 
-export const HomePage: React.FC<HomePageProps> = ({ onOpenSearch }) => {
+export const HomePage: React.FC<HomePageProps> = ({ onOpenSearch, onOpenAIAssistant }) => {
   const navigate = useNavigate();
   const { isFavorite, toggleFavorite, recentTools } = useStorage();
   const popularTools = getPopularTools();
@@ -132,13 +133,14 @@ export const HomePage: React.FC<HomePageProps> = ({ onOpenSearch }) => {
                 Tell the assistant what you need in plain English. Attach your files and let ToolHub parameterize and execute the right browser tools for you safely and sequentially.
               </p>
             </div>
-            <Link
-              to="/ai-assistant"
+            <button
+              type="button"
+              onClick={onOpenAIAssistant}
               className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-white text-sky-700 hover:bg-sky-50 font-semibold text-sm shadow-md transition-all active:scale-95 flex-shrink-0"
             >
               <span>Launch AI Assistant</span>
               <ArrowRight className="w-4 h-4" />
-            </Link>
+            </button>
           </div>
         </div>
       </section>
@@ -184,68 +186,24 @@ export const HomePage: React.FC<HomePageProps> = ({ onOpenSearch }) => {
         </div>
       </section>
 
-      {/* Categories Grid */}
+      {/* Recommended Tools Section */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">
-              Explore Tool Suites
+              Recommended Utilities
             </h2>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-              Select a category to view specialized utilities and workflows
+              Top recommended tools for everyday document, photo, student, and developer tasks
             </p>
           </div>
           <Link
             to="/tools"
             className="text-xs font-semibold text-sky-600 dark:text-sky-400 hover:underline flex items-center gap-1"
           >
-            <span>View All 140+ Tools</span>
+            <span>View All Tools</span>
             <ArrowRight className="w-3.5 h-3.5" />
           </Link>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {(Object.keys(CATEGORIES) as ToolCategory[]).map((catKey) => {
-            const cat = CATEGORIES[catKey];
-            const Icon = CATEGORY_ICONS[catKey] || FileText;
-
-            return (
-              <Link
-                key={cat.id}
-                to={`/category/${cat.id}`}
-                className="group p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800/90 hover:border-sky-500 dark:hover:border-sky-500 shadow-sm hover:shadow-md transition-all duration-200 flex flex-col justify-between"
-              >
-                <div>
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 group-hover:bg-sky-500 group-hover:text-white transition-colors duration-200">
-                      <Icon className="w-5 h-5" />
-                    </div>
-                    <span className="text-[11px] font-semibold text-slate-400 group-hover:text-sky-500 transition-colors">
-                      Explore →
-                    </span>
-                  </div>
-                  <h3 className="font-semibold text-sm text-slate-900 dark:text-slate-100 group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors">
-                    {cat.name}
-                  </h3>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-1.5 line-clamp-2 leading-relaxed">
-                    {cat.description}
-                  </p>
-                </div>
-              </Link>
-            );
-          })}
-        </div>
-      </section>
-
-      {/* Popular Tools Section */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
-        <div>
-          <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">
-            Popular Utilities
-          </h2>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-            The most frequently used tools for students, professionals, and developers
-          </p>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
@@ -290,7 +248,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onOpenSearch }) => {
                 </div>
 
                 <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-[11px] text-slate-400">
-                  <span>{tool.isOfflineCapable ? '⚡ Offline Ready' : 'In-Browser'}</span>
+                  <span>In-Browser</span>
                   <span className="font-semibold text-sky-600 dark:text-sky-400 group-hover:translate-x-0.5 transition-transform">
                     Use Tool →
                   </span>

@@ -15,9 +15,11 @@ import { FavoritesPage } from './pages/FavoritesPage';
 import { HistoryPage } from './pages/HistoryPage';
 import { PrivacyPage } from './pages/PrivacyPage';
 import { AboutPage } from './pages/AboutPage';
+import { AIAssistantModal } from './components/ai/AIAssistantModal';
 
 export const AppContent: React.FC = () => {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isAIAssistantOpen, setIsAIAssistantOpen] = useState(false);
 
   // Global Cmd+K / Ctrl+K listener
   useEffect(() => {
@@ -33,11 +35,22 @@ export const AppContent: React.FC = () => {
 
   return (
     <div className="flex flex-col min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors duration-200">
-      <Header onOpenSearch={() => setIsSearchOpen(true)} />
+      <Header
+        onOpenSearch={() => setIsSearchOpen(true)}
+        onOpenAIAssistant={() => setIsAIAssistantOpen(true)}
+      />
 
       <main className="flex-grow">
         <Routes>
-          <Route path="/" element={<HomePage onOpenSearch={() => setIsSearchOpen(true)} />} />
+          <Route
+            path="/"
+            element={
+              <HomePage
+                onOpenSearch={() => setIsSearchOpen(true)}
+                onOpenAIAssistant={() => setIsAIAssistantOpen(true)}
+              />
+            }
+          />
           <Route path="/tools" element={<ToolsCatalogPage />} />
           <Route path="/category/:categoryId" element={<CategoryPage />} />
           <Route path="/tool/:toolId" element={<ToolWorkspacePage />} />
@@ -55,6 +68,11 @@ export const AppContent: React.FC = () => {
       <GlobalSearchModal
         isOpen={isSearchOpen}
         onClose={() => setIsSearchOpen(false)}
+      />
+
+      <AIAssistantModal
+        isOpen={isAIAssistantOpen}
+        onClose={() => setIsAIAssistantOpen(false)}
       />
     </div>
   );

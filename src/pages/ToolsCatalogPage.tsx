@@ -147,7 +147,7 @@ export const ToolsCatalogPage: React.FC = () => {
                 </div>
 
                 <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-[11px] text-slate-400">
-                  <span>{tool.isOfflineCapable ? '⚡ Offline Ready' : 'In-Browser'}</span>
+                  <span>In-Browser</span>
                   <span className="font-semibold text-sky-600 dark:text-sky-400 group-hover:translate-x-0.5 transition-transform">
                     Use Tool →
                   </span>

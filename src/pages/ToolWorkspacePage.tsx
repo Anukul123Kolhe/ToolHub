@@ -68,12 +68,6 @@ export const ToolWorkspacePage: React.FC = () => {
             <Badge variant="neutral" size="sm">
               {category.name}
             </Badge>
-            {tool.isOfflineCapable && (
-              <Badge variant="success" size="sm" className="gap-1">
-                <WifiOff className="w-3 h-3" />
-                Offline Capable
-              </Badge>
-            )}
           </div>
           <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 max-w-2xl leading-relaxed">
             {tool.description}

@@ -181,15 +181,6 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({ isOpen, on
                         <Badge variant="neutral" size="sm">
                           {cat.name}
                         </Badge>
-                        {tool.isOfflineCapable && (
-                          <span
-                            className="text-[10px] text-emerald-600 dark:text-emerald-400 flex items-center gap-0.5"
-                            title="Works 100% offline in browser"
-                          >
-                            <WifiOff className="w-3 h-3" />
-                            Offline
-                          </span>
-                        )}
                       </div>
                       <p className="text-xs text-slate-500 dark:text-slate-400 truncate mt-0.5">
                         {tool.shortDescription || tool.description}

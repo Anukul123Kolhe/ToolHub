@@ -17,9 +17,10 @@ import { useStorage } from '../../context/StorageContext';
 
 interface HeaderProps {
   onOpenSearch: () => void;
+  onOpenAIAssistant: () => void;
 }
 
-export const Header: React.FC<HeaderProps> = ({ onOpenSearch }) => {
+export const Header: React.FC<HeaderProps> = ({ onOpenSearch, onOpenAIAssistant }) => {
   const { theme, toggleTheme } = useTheme();
   const { favorites } = useStorage();
   const location = useLocation();
@@ -75,17 +76,14 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSearch }) => {
             All Tools
           </Link>
 
-          <Link
-            to="/ai-assistant"
-            className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg transition-all ${
-              isActive('/ai-assistant')
-                ? 'bg-sky-500 text-white shadow-sm'
-                : 'bg-gradient-to-r from-sky-500/10 to-indigo-500/10 text-sky-700 dark:text-sky-300 hover:from-sky-500/20 hover:to-indigo-500/20'
-            }`}
+          <button
+            type="button"
+            onClick={onOpenAIAssistant}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg transition-all bg-gradient-to-r from-sky-500/10 to-indigo-500/10 text-sky-700 dark:text-sky-300 hover:from-sky-500/20 hover:to-indigo-500/20 hover:scale-[1.02] border border-sky-200/50 dark:border-sky-800/50"
           >
-            <Sparkles className="w-3.5 h-3.5 text-sky-500" />
+            <Sparkles className="w-3.5 h-3.5 text-sky-500 animate-pulse" />
             <span>AI Assistant</span>
-          </Link>
+          </button>
 
           <Link
             to="/favorites"
@@ -155,14 +153,17 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSearch }) => {
           >
             All 140+ Tools
           </Link>
-          <Link
-            to="/ai-assistant"
-            onClick={() => setMobileMenuOpen(false)}
-            className="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg text-sky-600 dark:text-sky-400 bg-sky-50 dark:bg-sky-950/40"
+          <button
+            type="button"
+            onClick={() => {
+              setMobileMenuOpen(false);
+              onOpenAIAssistant();
+            }}
+            className="w-full flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg text-sky-600 dark:text-sky-400 bg-sky-50 dark:bg-sky-950/40 text-left"
           >
             <Sparkles className="w-4 h-4" />
             AI Task Assistant
-          </Link>
+          </button>
           <Link
             to="/favorites"
             onClick={() => setMobileMenuOpen(false)}
