@@ -71,4 +71,40 @@ describe('Advanced Utility Functions', () => {
     expect(unzipped[originalFileName]).toBeDefined();
     expect(strFromU8(unzipped[originalFileName])).toBe(originalContent);
   });
+
+  it('correctly resolves category list queries with complete multi-tool listings', async () => {
+    const { resolveNaturalLanguageIntent } = await import('../services/ai/aiService');
+
+    // 1. Image tools list test
+    const imageListRes = resolveNaturalLanguageIntent('Give me list of image tools');
+    expect(imageListRes.message).toContain('/tool/image-compressor');
+    expect(imageListRes.message).toContain('/tool/image-exact-size');
+    expect(imageListRes.message).toContain('/tool/image-resizer');
+    expect(imageListRes.message).toContain('/tool/image-cropper');
+    expect(imageListRes.message).not.toContain('I identified that **Image Compressor** is the best match');
+
+    // 2. PDF tools list test
+    const pdfListRes = resolveNaturalLanguageIntent('Show me PDF tools');
+    expect(pdfListRes.message).toContain('/tool/pdf-merge');
+    expect(pdfListRes.message).toContain('/tool/pdf-split');
+    expect(pdfListRes.message).toContain('/tool/pdf-compress');
+
+    // 3. Student tools list test
+    const studentListRes = resolveNaturalLanguageIntent('What student tools are available?');
+    expect(studentListRes.message).toContain('/tool/sgpa-calculator');
+    expect(studentListRes.message).toContain('/tool/attendance-calculator');
+
+    // 4. All tools overview test
+    const allToolsRes = resolveNaturalLanguageIntent('List all tools');
+    expect(allToolsRes.message).toContain('PDF & Documents');
+    expect(allToolsRes.message).toContain('Image & Photos');
+    expect(allToolsRes.message).toContain('Students & Academics');
+
+    // 5. Targeted task execution plan test
+    const targetKbRes = resolveNaturalLanguageIntent('Compress this photo to less than 100 KB');
+    expect(targetKbRes.actionPlan).toBeDefined();
+    expect(targetKbRes.actionPlan?.tool.id).toBe('image-exact-size');
+    expect(targetKbRes.actionPlan?.parameters.targetKb).toBe(100);
+  });
 });
+

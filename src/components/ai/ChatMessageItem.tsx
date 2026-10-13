@@ -58,6 +58,7 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
 }) => {
   const [inlineKey, setInlineKey] = useState('');
   const [copiedCodeBlockIdx, setCopiedCodeBlockIdx] = useState<number | null>(null);
+  const [showAllTools, setShowAllTools] = useState(false);
 
   // Extract all tool IDs referenced in the text
   const extractReferencedTools = (text: string): ToolRegistryItem[] => {
@@ -169,6 +170,45 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
                   <div key={paraIdx} className="space-y-1">
                     {lines.map((line, lIdx) => {
                       const trimmed = line.trim();
+
+                      // Headings
+                      if (trimmed.startsWith('### ')) {
+                        return (
+                          <h4 key={lIdx} className="text-xs font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200 mt-3 mb-1">
+                            {renderInlineMarkdown(trimmed.substring(4))}
+                          </h4>
+                        );
+                      }
+                      if (trimmed.startsWith('## ')) {
+                        return (
+                          <h3 key={lIdx} className="text-sm font-bold text-slate-900 dark:text-slate-100 mt-3 mb-1">
+                            {renderInlineMarkdown(trimmed.substring(3))}
+                          </h3>
+                        );
+                      }
+                      if (trimmed.startsWith('# ')) {
+                        return (
+                          <h2 key={lIdx} className="text-base font-bold text-slate-900 dark:text-slate-100 mt-3.5 mb-1.5">
+                            {renderInlineMarkdown(trimmed.substring(2))}
+                          </h2>
+                        );
+                      }
+
+                      // Horizontal rules
+                      if (trimmed === '---' || trimmed === '***') {
+                        return <hr key={lIdx} className="my-2 border-slate-200 dark:border-slate-800" />;
+                      }
+
+                      // Blockquotes
+                      if (trimmed.startsWith('> ')) {
+                        return (
+                          <blockquote key={lIdx} className="border-l-2 border-sky-500 pl-3 py-1 my-1 text-xs text-slate-600 dark:text-slate-300 italic bg-sky-50/40 dark:bg-sky-950/20 rounded-r-md">
+                            {renderInlineMarkdown(trimmed.substring(2))}
+                          </blockquote>
+                        );
+                      }
+
+                      // Bullet lists
                       if (trimmed.startsWith('* ') || trimmed.startsWith('- ')) {
                         return (
                           <div key={lIdx} className="flex items-start gap-2 ml-1">
@@ -177,6 +217,8 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
                           </div>
                         );
                       }
+
+                      // Numbered lists
                       if (/^\d+\.\s/.test(trimmed)) {
                         const numMatch = trimmed.match(/^(\d+\.)\s(.*)/);
                         return (
@@ -186,6 +228,7 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
                           </div>
                         );
                       }
+
                       return (
                         <p key={lIdx} className="leading-relaxed">
                           {renderInlineMarkdown(line)}
@@ -236,8 +279,8 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
   };
 
   const renderBoldAndCode = (segment: string) => {
-    // Format `code` and **bold**
-    const tokens = segment.split(/(`[^`]+`|\*\*[^*]+\*\*)/g);
+    // Format `code`, **bold**, and *italic*
+    const tokens = segment.split(/(`[^`]+`|\*\*[^*]+\*\*|\*[^*]+\*)/g);
     return tokens.map((token, i) => {
       if (token.startsWith('`') && token.endsWith('`')) {
         return (
@@ -254,6 +297,13 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
           <strong key={i} className="font-bold text-slate-900 dark:text-slate-100">
             {token.slice(2, -2)}
           </strong>
+        );
+      }
+      if (token.startsWith('*') && token.endsWith('*')) {
+        return (
+          <em key={i} className="italic text-slate-600 dark:text-slate-300">
+            {token.slice(1, -1)}
+          </em>
         );
       }
       return token;
@@ -283,11 +333,22 @@ export const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
         {/* ChatGPT / Gemini Style Connected Tool Cards */}
         {referencedTools.length > 0 && (
           <div className="pt-2 space-y-2">
-            <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
-              Connected ToolHub Utilities
-            </p>
+            <div className="flex items-center justify-between">
+              <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                Connected ToolHub Utilities ({referencedTools.length})
+              </p>
+              {referencedTools.length > 6 && (
+                <button
+                  type="button"
+                  onClick={() => setShowAllTools(!showAllTools)}
+                  className="text-[11px] text-sky-500 hover:text-sky-600 dark:hover:text-sky-400 font-medium hover:underline"
+                >
+                  {showAllTools ? 'Show fewer' : `View all ${referencedTools.length} tools`}
+                </button>
+              )}
+            </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              {referencedTools.map((tool) => {
+              {(showAllTools ? referencedTools : referencedTools.slice(0, 6)).map((tool) => {
                 const IconComponent = CATEGORY_ICONS[tool.category] || Wrench;
                 return (
                   <div

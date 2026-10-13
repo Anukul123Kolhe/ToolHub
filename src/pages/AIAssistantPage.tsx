@@ -121,17 +121,20 @@ export const AIAssistantPage: React.FC = () => {
     const currentKey = apiKey || getEffectiveApiKey();
 
     if (!currentKey) {
-      setPendingPrompt(text);
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: `prompt-key-${Date.now()}`,
-          sender: 'assistant',
-          text: 'To connect with AI tools and assistance, please enter your Google Gemini API key below or set it in Settings:',
-          timestamp: Date.now(),
-          isKeyPrompt: true,
-        },
-      ]);
+      setIsLoading(true);
+      setTimeout(() => {
+        const fallback = resolveNaturalLanguageIntent(text);
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: `assistant-${Date.now()}`,
+            sender: 'assistant',
+            text: fallback.message,
+            timestamp: Date.now(),
+          },
+        ]);
+        setIsLoading(false);
+      }, 350);
       return;
     }
 
@@ -139,10 +142,10 @@ export const AIAssistantPage: React.FC = () => {
   };
 
   const quickPrompts = [
+    { title: 'Give me list of image tools', desc: 'Browse all 18 in-browser photo utilities' },
     { title: 'Compress an image', desc: 'Reduce file size under 50KB or custom KB' },
     { title: 'Merge PDF files', desc: 'Combine multiple assignment PDFs into one' },
     { title: 'Calculate SGPA & CGPA', desc: 'Compute semester grades and percentage' },
-    { title: 'Generate QR code', desc: 'Create Wi-Fi, URL, or contact QR codes' },
   ];
 
   return (

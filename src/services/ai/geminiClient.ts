@@ -52,12 +52,19 @@ export function savePreferredModel(model: string): void {
 const GEMINI_SYSTEM_INSTRUCTION = `
 You are ToolHub Assistant, an expert AI utility orchestrator for ToolHub (the privacy-first, 100% in-browser online utility platform with 140+ utilities).
 
-Core Platform Principles:
-1. Every file tool processes files 100% locally in browser memory (Zero server uploads).
+Core Platform Principles & Formatting:
+1. Every file tool processes files 100% locally in browser memory (Zero server uploads, strictly private).
 2. Whenever a user describes a problem, task, or need, connect them to the matching ToolHub tool by writing a markdown link with its exact path: [Tool Name](/tool/tool-id).
-3. If multiple tools are relevant, present each tool clearly.
-4. Format your responses elegantly like ChatGPT / Google Gemini with clean bullet points, numbered steps, or code blocks where applicable.
-5. Provide helpful tips, formulas, and parameters for the tools.
+3. CATEGORY / LISTING REQUESTS:
+   - When the user asks for a list or category of tools (e.g. "Give me list of image tools", "Show me PDF tools", "What student calculators do you have?", "List all developer utilities", "What tools are available?"), you MUST provide a complete, well-structured, and friendly list of ALL matching tools in that category.
+   - NEVER reduce or summarize a list/category request down to a single tool!
+   - Format each tool with bullet points: * [Tool Name](/tool/tool-id) – Brief description and key capability.
+4. INDIVIDUAL TASK REQUESTS:
+   - When a user asks for a specific task (e.g. "Compress photo under 50KB", "Resize signature to 300x100", "Merge PDFs", "Calculate SGPA"), connect them to the best tool: [Tool Name](/tool/tool-id).
+   - Explain how the tool operates, suggest recommended parameters, and highlight client-side privacy.
+5. ChatGPT / Gemini Visual Style:
+   - Use clean Markdown with subheadings (###), bold text, bullet lists (*), and code blocks where applicable.
+   - Maintain a helpful, confident, and professional assistant tone.
 
 Complete Implemented Tools Registry on ToolHub:
 ${TOOLS.map((t) => `- ${t.name} (Path: ${t.path}, Category: ${t.category}): ${t.shortDescription || t.description}`).join('\n')}
@@ -96,7 +103,7 @@ async function executeGeminiRequest(
     contents,
     generationConfig: {
       temperature: 0.7,
-      maxOutputTokens: 1200,
+      maxOutputTokens: 1600,
     },
   };
 
@@ -135,27 +142,18 @@ export async function callGeminiApi(
   try {
     return await executeGeminiRequest(apiKey, initialModel, userMessage, conversationHistory);
   } catch (err: any) {
-    const errMsg = err?.message || '';
-    const isModelUnavailable =
-      errMsg.includes('no longer available') ||
-      errMsg.includes('not found') ||
-      errMsg.includes('404') ||
-      errMsg.includes('unsupported');
+    console.warn(`Request with ${initialModel} failed:`, err?.message);
 
-    if (isModelUnavailable) {
-      console.warn(`Model ${initialModel} unavailable. Initiating auto-fallback...`);
-      // Try next models in the fallback chain
-      for (const fallback of FALLBACK_MODEL_CHAIN) {
-        if (fallback === initialModel) continue;
-        try {
-          console.info(`Retrying request with fallback model: ${fallback}`);
-          const result = await executeGeminiRequest(apiKey, fallback, userMessage, conversationHistory);
-          // Persist the working model for future calls
-          savePreferredModel(fallback);
-          return result;
-        } catch (fallbackErr) {
-          console.warn(`Fallback ${fallback} failed, trying next...`);
-        }
+    // Attempt other models in the fallback chain
+    for (const fallback of FALLBACK_MODEL_CHAIN) {
+      if (fallback === initialModel) continue;
+      try {
+        console.info(`Retrying request with fallback model: ${fallback}`);
+        const result = await executeGeminiRequest(apiKey, fallback, userMessage, conversationHistory);
+        savePreferredModel(fallback);
+        return result;
+      } catch (fallbackErr: any) {
+        console.warn(`Fallback ${fallback} failed:`, fallbackErr?.message);
       }
     }
 
