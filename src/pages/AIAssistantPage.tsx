@@ -5,38 +5,22 @@ import {
   ArrowUp,
   RotateCcw,
   Settings,
-  Copy,
-  Check,
-  ChevronDown,
-  ArrowUpRight,
 } from 'lucide-react';
 import { Card } from '../components/common/Card';
 import { Breadcrumbs } from '../components/layout/Breadcrumbs';
 import {
   callGeminiApi,
-  AVAILABLE_GEMINI_MODELS,
-  DEFAULT_GEMINI_MODEL,
   getEffectiveApiKey,
   saveEffectiveApiKey,
   getPreferredModel,
-  savePreferredModel,
 } from '../services/ai/geminiClient';
 import { resolveNaturalLanguageIntent } from '../services/ai/aiService';
-
-interface ChatMessage {
-  id: string;
-  sender: 'user' | 'assistant';
-  text: string;
-  timestamp: number;
-  toolLink?: { name: string; path: string };
-  isKeyPrompt?: boolean;
-}
+import { ChatMessageItem, ChatMessage } from '../components/ai/ChatMessageItem';
 
 export const AIAssistantPage: React.FC = () => {
   const [apiKey, setApiKey] = useState<string>(() => getEffectiveApiKey());
   const [selectedModel, setSelectedModel] = useState<string>(() => getPreferredModel());
   const [copiedId, setCopiedId] = useState<string | null>(null);
-  const [inlineKeyInput, setInlineKeyInput] = useState<string>('');
 
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputText, setInputText] = useState<string>('');
@@ -56,17 +40,11 @@ export const AIAssistantPage: React.FC = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isLoading]);
 
-  const handleModelChange = (modelId: string) => {
-    setSelectedModel(modelId);
-    savePreferredModel(modelId);
-  };
-
   const handleSaveInlineKey = (keyVal: string) => {
     const trimmed = keyVal.trim();
     if (!trimmed) return;
     saveEffectiveApiKey(trimmed);
     setApiKey(trimmed);
-    setInlineKeyInput('');
 
     const promptToSend = pendingPrompt;
     setPendingPrompt(null);
@@ -100,9 +78,6 @@ export const AIAssistantPage: React.FC = () => {
         selectedModel
       );
 
-      const routeMatch = aiResponse.match(/\/tool\/([a-z0-9-]+)/i);
-      const toolLink = routeMatch ? { name: routeMatch[1], path: routeMatch[0] } : undefined;
-
       setMessages((prev) => [
         ...prev.filter((m) => !m.isKeyPrompt),
         {
@@ -110,7 +85,6 @@ export const AIAssistantPage: React.FC = () => {
           sender: 'assistant',
           text: aiResponse,
           timestamp: Date.now(),
-          toolLink,
         },
       ]);
     } catch (err: any) {
@@ -123,9 +97,6 @@ export const AIAssistantPage: React.FC = () => {
           sender: 'assistant',
           text: fallback.message,
           timestamp: Date.now(),
-          toolLink: fallback.actionPlan
-            ? { name: fallback.actionPlan.tool.name, path: fallback.actionPlan.tool.path }
-            : undefined,
         },
       ]);
     } finally {
@@ -156,7 +127,7 @@ export const AIAssistantPage: React.FC = () => {
         {
           id: `prompt-key-${Date.now()}`,
           sender: 'assistant',
-          text: 'To chat using Google Gemini AI, please provide your Google API key below or configure it in Settings:',
+          text: 'To connect with AI tools and assistance, please enter your Google Gemini API key below or set it in Settings:',
           timestamp: Date.now(),
           isKeyPrompt: true,
         },
@@ -179,25 +150,16 @@ export const AIAssistantPage: React.FC = () => {
       <Breadcrumbs items={[{ label: 'AI Assistant' }]} />
 
       <Card className="flex flex-col h-[740px] max-h-[85vh] overflow-hidden border border-slate-200 dark:border-slate-800 shadow-xl rounded-2xl bg-white dark:bg-slate-900">
-        {/* Header */}
+        {/* Header (No model name in top left) */}
         <div className="flex items-center justify-between px-5 py-3 border-b border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900 select-none">
-          {/* Model Selector */}
-          <div className="relative flex items-center">
-            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-slate-800 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer">
-              <Sparkles className="w-4 h-4 text-sky-500 shrink-0" />
-              <select
-                value={selectedModel}
-                onChange={(e) => handleModelChange(e.target.value)}
-                className="bg-transparent border-none text-xs sm:text-sm font-semibold focus:outline-none cursor-pointer appearance-none pr-4"
-              >
-                {AVAILABLE_GEMINI_MODELS.map((m) => (
-                  <option key={m.id} value={m.id} className="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">
-                    {m.name.split(' (')[0]}
-                  </option>
-                ))}
-              </select>
-              <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-2 pointer-events-none" />
+          {/* Top Left: Clean Title & Icon (model name removed) */}
+          <div className="flex items-center gap-2">
+            <div className="w-7 h-7 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-sky-500 shadow-2xs">
+              <Sparkles className="w-4 h-4" />
             </div>
+            <span className="font-semibold text-sm text-slate-900 dark:text-slate-100 tracking-tight">
+              AI Assistant
+            </span>
           </div>
 
           {/* Right Controls */}
@@ -256,95 +218,20 @@ export const AIAssistantPage: React.FC = () => {
             </div>
           )}
 
-          {/* Messages */}
+          {/* Messages rendered via ChatMessageItem */}
           {messages.map((msg) => (
-            <div key={msg.id} className="space-y-2">
-              {msg.sender === 'user' ? (
-                <div className="flex justify-end">
-                  <div className="max-w-[80%] rounded-2xl rounded-tr-xs bg-slate-100 dark:bg-slate-800 px-4 py-2.5 text-xs sm:text-sm text-slate-900 dark:text-slate-100 leading-relaxed whitespace-pre-wrap">
-                    {msg.text}
-                  </div>
-                </div>
-              ) : (
-                <div className="flex gap-3 text-xs sm:text-sm leading-relaxed group">
-                  <div className="w-6 h-6 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-sky-500 shrink-0 mt-0.5">
-                    <Sparkles className="w-3.5 h-3.5" />
-                  </div>
-
-                  <div className="flex-1 space-y-2 text-slate-800 dark:text-slate-200">
-                    <p className="whitespace-pre-wrap">{msg.text}</p>
-
-                    {msg.isKeyPrompt && (
-                      <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-2 mt-2">
-                        <div className="flex items-center gap-2">
-                          <input
-                            type="password"
-                            value={inlineKeyInput}
-                            onChange={(e) => setInlineKeyInput(e.target.value)}
-                            placeholder="Paste Google Gemini API Key (AIzaSy...)"
-                            className="w-full text-xs p-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-sky-500 font-mono"
-                          />
-                          <button
-                            type="button"
-                            onClick={() => handleSaveInlineKey(inlineKeyInput)}
-                            disabled={!inlineKeyInput.trim()}
-                            className="px-3 py-2 rounded-lg bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-xs font-semibold disabled:opacity-50 transition-opacity shrink-0"
-                          >
-                            Connect
-                          </button>
-                        </div>
-                        <div className="flex items-center justify-between text-[11px] text-slate-400">
-                          <span>Get free key at aistudio.google.com</span>
-                          <button
-                            type="button"
-                            onClick={() => navigate('/settings')}
-                            className="text-sky-500 hover:underline"
-                          >
-                            Settings →
-                          </button>
-                        </div>
-                      </div>
-                    )}
-
-                    {msg.toolLink && (
-                      <div className="pt-1">
-                        <button
-                          type="button"
-                          onClick={() => navigate(msg.toolLink!.path)}
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700/60 text-xs font-semibold text-sky-600 dark:text-sky-400 transition-colors shadow-2xs"
-                        >
-                          <span>Open {msg.toolLink.name}</span>
-                          <ArrowUpRight className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                    )}
-
-                    <div className="flex items-center gap-2 pt-1">
-                      <button
-                        type="button"
-                        onClick={() => handleCopyMessage(msg.id, msg.text)}
-                        className="opacity-0 group-hover:opacity-100 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-opacity flex items-center gap-1 text-[11px]"
-                        title="Copy message"
-                      >
-                        {copiedId === msg.id ? (
-                          <>
-                            <Check className="w-3 h-3 text-emerald-500" />
-                            <span className="text-emerald-500">Copied</span>
-                          </>
-                        ) : (
-                          <>
-                            <Copy className="w-3 h-3" />
-                            <span>Copy</span>
-                          </>
-                        )}
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
+            <ChatMessageItem
+              key={msg.id}
+              message={msg}
+              onNavigateTool={(path) => navigate(path)}
+              onSaveKey={handleSaveInlineKey}
+              onCopy={handleCopyMessage}
+              isCopied={copiedId === msg.id}
+              onOpenSettings={() => navigate('/settings')}
+            />
           ))}
 
+          {/* Typing Indicator */}
           {isLoading && (
             <div className="flex gap-3 text-xs sm:text-sm">
               <div className="w-6 h-6 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-sky-500 shrink-0">
@@ -361,7 +248,7 @@ export const AIAssistantPage: React.FC = () => {
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Input Box */}
+        {/* Floating Input Box */}
         <div className="p-3 sm:p-4 border-t border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900 space-y-2">
           <div className="relative flex items-center rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50/70 dark:bg-slate-800/60 focus-within:border-slate-400 dark:focus-within:border-slate-500 focus-within:bg-white dark:focus-within:bg-slate-800 transition-all shadow-xs">
             <input
@@ -390,7 +277,7 @@ export const AIAssistantPage: React.FC = () => {
           </div>
 
           <p className="text-center text-[11px] text-slate-400">
-            ToolHub AI may produce errors. Utilities process files locally in your browser.
+            ToolHub AI connects directly to utilities. All tools process files locally.
           </p>
         </div>
       </Card>
