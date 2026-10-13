@@ -15,6 +15,7 @@ import { FavoritesPage } from './pages/FavoritesPage';
 import { HistoryPage } from './pages/HistoryPage';
 import { PrivacyPage } from './pages/PrivacyPage';
 import { AboutPage } from './pages/AboutPage';
+import { SettingsPage } from './pages/SettingsPage';
 import { AIAssistantModal } from './components/ai/AIAssistantModal';
 
 export const AppContent: React.FC = () => {
@@ -57,6 +58,7 @@ export const AppContent: React.FC = () => {
           <Route path="/ai-assistant" element={<AIAssistantPage />} />
           <Route path="/favorites" element={<FavoritesPage />} />
           <Route path="/history" element={<HistoryPage />} />
+          <Route path="/settings" element={<SettingsPage />} />
           <Route path="/privacy" element={<PrivacyPage />} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />

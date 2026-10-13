@@ -89,6 +89,11 @@ export const Footer: React.FC = () => {
                 </Link>
               </li>
               <li>
+                <Link to="/settings" className="hover:text-sky-500 transition-colors">
+                  Settings & API Key
+                </Link>
+              </li>
+              <li>
                 <Link to="/privacy" className="hover:text-sky-500 transition-colors">
                   Privacy Architecture
                 </Link>

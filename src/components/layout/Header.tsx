@@ -11,6 +11,7 @@ import {
   Menu,
   X,
   ShieldCheck,
+  Settings,
 } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { useStorage } from '../../context/StorageContext';
@@ -104,6 +105,14 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSearch, onOpenAIAssistant 
             <History className="w-4 h-4" />
           </Link>
 
+          <Link
+            to="/settings"
+            className="p-2 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
+            title="Settings & API Key"
+          >
+            <Settings className="w-4 h-4" />
+          </Link>
+
           <div className="h-4 w-px bg-slate-200 dark:bg-slate-800 mx-1" />
 
           {/* Theme Switcher */}
@@ -177,6 +186,14 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSearch, onOpenAIAssistant 
             className="block px-3 py-2 text-sm font-medium rounded-lg text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-900"
           >
             Activity History
+          </Link>
+          <Link
+            to="/settings"
+            onClick={() => setMobileMenuOpen(false)}
+            className="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-900"
+          >
+            <Settings className="w-4 h-4 text-sky-500" />
+            Settings & API Key
           </Link>
           <Link
             to="/privacy"

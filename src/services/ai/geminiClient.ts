@@ -7,14 +7,14 @@ export interface GeminiModelOption {
 }
 
 export const AVAILABLE_GEMINI_MODELS: GeminiModelOption[] = [
-  { id: 'gemini-2.0-flash', name: 'Gemini 2.0 Flash (Latest & Fast)', isLatest: true },
-  { id: 'gemini-2.0-flash-lite', name: 'Gemini 2.0 Flash Lite (Ultra Fast)', isLatest: true },
-  { id: 'gemini-2.0-pro-exp-02-05', name: 'Gemini 2.0 Pro Exp (Complex Reasoning)', isLatest: true },
-  { id: 'gemini-1.5-flash', name: 'Gemini 1.5 Flash (Standard)' },
-  { id: 'gemini-1.5-pro', name: 'Gemini 1.5 Pro (High Context)' },
+  { id: 'gemini-3.8-flash', name: 'Gemini 3.8 Flash (Latest & Recommended)', isLatest: true },
+  { id: 'gemini-2.5-flash', name: 'Gemini 2.5 Flash (Fast)', isLatest: true },
+  { id: 'gemini-1.5-flash', name: 'Gemini 1.5 Flash (Ultra Stable & High Speed)' },
+  { id: 'gemini-1.5-pro', name: 'Gemini 1.5 Pro (Deep Reasoning & Large Context)' },
+  { id: 'gemini-2.0-flash', name: 'Gemini 2.0 Flash (Legacy)' },
 ];
 
-export const DEFAULT_GEMINI_MODEL = 'gemini-2.0-flash';
+export const DEFAULT_GEMINI_MODEL = 'gemini-3.8-flash';
 
 export function getEffectiveApiKey(): string {
   return (
@@ -36,28 +36,47 @@ export function clearEffectiveApiKey(): void {
   }
 }
 
+export function getPreferredModel(): string {
+  if (typeof localStorage !== 'undefined') {
+    return localStorage.getItem('toolhub_gemini_model') || DEFAULT_GEMINI_MODEL;
+  }
+  return DEFAULT_GEMINI_MODEL;
+}
+
+export function savePreferredModel(model: string): void {
+  if (typeof localStorage !== 'undefined') {
+    localStorage.setItem('toolhub_gemini_model', model.trim());
+  }
+}
+
 const GEMINI_SYSTEM_INSTRUCTION = `
-You are ToolHub Assistant, a smart, concise AI assistant for ToolHub (an all-in-one privacy-first online utility platform).
-ToolHub contains 140+ utilities spanning PDF editing, image conversion, developer utilities, academic calculators, and file converters.
+You are ToolHub Assistant, an ultra-smart, friendly AI companion for ToolHub (the privacy-first, 100% in-browser online utility platform).
+ToolHub features 140+ utilities spanning PDF editing, image transformation, academic GPA/attendance calculations, developer tools, and file utilities.
 
 Core Platform Principles:
-1. All file tools process files 100% locally in browser memory (zero server transmission).
-2. Recommend the exact ToolHub tool with its URL path when relevant (e.g. [Tool Name](/tool/tool-id)).
-3. Keep answers clean, direct, and actionable.
+1. Every file tool runs 100% locally in browser memory using WebAssembly & modern Web APIs (Zero file uploads to external servers).
+2. When answering, recommend the exact ToolHub tool with a markdown link (e.g. [Tool Name](/tool/tool-id)).
+3. Keep answers concise, helpful, and directly applicable.
 
 Key Implemented Tools on ToolHub:
 ${TOOLS.slice(0, 60).map((t) => `- ${t.name} (Path: ${t.path}): ${t.shortDescription || t.description}`).join('\n')}
-...and 80+ other tools.
+...and over 80 other utilities.
 `;
 
-export async function callGeminiApi(
+const FALLBACK_MODEL_CHAIN = [
+  'gemini-3.8-flash',
+  'gemini-1.5-flash',
+  'gemini-2.5-flash',
+  'gemini-1.5-pro',
+];
+
+async function executeGeminiRequest(
   apiKey: string,
+  model: string,
   userMessage: string,
-  conversationHistory: { role: 'user' | 'model'; text: string }[] = [],
-  model: string = DEFAULT_GEMINI_MODEL
+  conversationHistory: { role: 'user' | 'model'; text: string }[] = []
 ): Promise<string> {
-  const chosenModel = model.trim() || DEFAULT_GEMINI_MODEL;
-  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${chosenModel}:generateContent?key=${apiKey.trim()}`;
+  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model.trim()}:generateContent?key=${apiKey.trim()}`;
 
   const contents = [
     ...conversationHistory.map((item) => ({
@@ -103,4 +122,53 @@ export async function callGeminiApi(
   }
 
   return text;
+}
+
+export async function callGeminiApi(
+  apiKey: string,
+  userMessage: string,
+  conversationHistory: { role: 'user' | 'model'; text: string }[] = [],
+  model: string = DEFAULT_GEMINI_MODEL
+): Promise<string> {
+  const initialModel = model.trim() || DEFAULT_GEMINI_MODEL;
+
+  try {
+    return await executeGeminiRequest(apiKey, initialModel, userMessage, conversationHistory);
+  } catch (err: any) {
+    const errMsg = err?.message || '';
+    const isModelUnavailable =
+      errMsg.includes('no longer available') ||
+      errMsg.includes('not found') ||
+      errMsg.includes('404') ||
+      errMsg.includes('unsupported');
+
+    if (isModelUnavailable) {
+      console.warn(`Model ${initialModel} unavailable. Initiating auto-fallback...`);
+      // Try next models in the fallback chain
+      for (const fallback of FALLBACK_MODEL_CHAIN) {
+        if (fallback === initialModel) continue;
+        try {
+          console.info(`Retrying request with fallback model: ${fallback}`);
+          const result = await executeGeminiRequest(apiKey, fallback, userMessage, conversationHistory);
+          // Persist the working model for future calls
+          savePreferredModel(fallback);
+          return result;
+        } catch (fallbackErr) {
+          console.warn(`Fallback ${fallback} failed, trying next...`);
+        }
+      }
+    }
+
+    throw err;
+  }
+}
+
+export async function testGeminiConnection(apiKey: string, model: string = DEFAULT_GEMINI_MODEL): Promise<boolean> {
+  const testResponse = await callGeminiApi(
+    apiKey,
+    'Respond with the exact word "CONNECTED" to verify API connection.',
+    [],
+    model
+  );
+  return Boolean(testResponse);
 }
