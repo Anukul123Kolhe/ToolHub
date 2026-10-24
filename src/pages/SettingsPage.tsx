@@ -66,7 +66,11 @@ export const SettingsPage: React.FC = () => {
 
   // Test Connection State
   const [isTesting, setIsTesting] = useState<boolean>(false);
-  const [testResult, setTestResult] = useState<{ success: boolean; message: string } | null>(null);
+  const [testResult, setTestResult] = useState<{
+    success: boolean;
+    message: string;
+    suggestedModel?: string;
+  } | null>(null);
 
   // General Status Notification
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
@@ -147,6 +151,11 @@ export const SettingsPage: React.FC = () => {
     if (res.success) {
       const updated = getAllAvailableModels();
       setModelsList(updated);
+      if (res.suggestedModel) {
+        setSelectedModel(res.suggestedModel);
+        setIsCustomModelActive(false);
+        savePreferredModel(res.suggestedModel);
+      }
     }
 
     setIsTesting(false);
@@ -365,18 +374,30 @@ export const SettingsPage: React.FC = () => {
           {/* Test Connection Alert Box */}
           {testResult && (
             <div
-              className={`p-3.5 rounded-xl border text-xs font-semibold flex items-center gap-2.5 transition-all ${
+              className={`p-3.5 rounded-xl border text-xs font-semibold flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition-all ${
                 testResult.success
                   ? 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-300 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300'
                   : 'bg-rose-50 dark:bg-rose-950/40 border-rose-300 dark:border-rose-800 text-rose-800 dark:text-rose-300'
               }`}
             >
-              {testResult.success ? (
-                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-              ) : (
-                <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+              <div className="flex items-start sm:items-center gap-2.5">
+                {testResult.success ? (
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5 sm:mt-0" />
+                ) : (
+                  <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5 sm:mt-0" />
+                )}
+                <span className="leading-relaxed">{testResult.message}</span>
+              </div>
+
+              {testResult.suggestedModel && selectedModel !== testResult.suggestedModel && (
+                <button
+                  type="button"
+                  onClick={() => handleSelectModel(testResult.suggestedModel!)}
+                  className="px-3 py-1.5 text-xs font-bold rounded-lg bg-blue-600 hover:bg-blue-700 text-white transition-colors shrink-0 whitespace-nowrap self-start sm:self-auto shadow-xs cursor-pointer"
+                >
+                  Switch to {testResult.suggestedModel}
+                </button>
               )}
-              <span>{testResult.message}</span>
             </div>
           )}
 

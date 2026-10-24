@@ -107,6 +107,12 @@ export const AIAssistantPage: React.FC = () => {
         selectedModel
       );
 
+      // If the model was automatically switched to a working fallback, sync UI state
+      const currentPreferred = getPreferredModel();
+      if (currentPreferred && currentPreferred !== selectedModel) {
+        setSelectedModel(currentPreferred);
+      }
+
       setMessages((prev) => [
         ...prev,
         {
@@ -119,12 +125,15 @@ export const AIAssistantPage: React.FC = () => {
     } catch (err: any) {
       console.error('Gemini API Error:', err);
       const fallback = resolveNaturalLanguageIntent(messageText);
+      const quotaNotice = err?.message?.includes('limit: 0')
+        ? `\n\n> 💡 *Note: The selected model has limit: 0 on Google Free Tier. Switched to Gemini 2.5 Flash.*`
+        : '';
       setMessages((prev) => [
         ...prev,
         {
           id: `assistant-${Date.now()}`,
           sender: 'assistant',
-          text: fallback.message,
+          text: (fallback.message || '') + quotaNotice,
           timestamp: Date.now(),
         },
       ]);

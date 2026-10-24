@@ -10,10 +10,10 @@ export interface GeminiModelOption {
 
 export const AVAILABLE_GEMINI_MODELS: GeminiModelOption[] = [
   {
-    id: 'gemini-4-argon',
-    name: 'Gemini 4 Argon',
-    tag: 'Argon • Next-Gen Flagship',
-    description: 'Next-generation Google Argon architecture model with frontier intelligence and deep synthesis.',
+    id: 'gemini-2.5-flash',
+    name: 'Gemini 2.5 Flash',
+    tag: 'Free Tier Ready • Recommended',
+    description: 'Flagship model with full Google Free Tier quota (15 RPM / 1,500 RPD) and sub-second execution.',
     isLatest: true,
   },
   {
@@ -21,6 +21,13 @@ export const AVAILABLE_GEMINI_MODELS: GeminiModelOption[] = [
     name: 'Gemini 3.8 Flash',
     tag: '3.8 • Ultra Fast',
     description: 'Ultra-high-speed Google 3.8 generation model with sub-second execution.',
+    isLatest: true,
+  },
+  {
+    id: 'gemini-4-argon',
+    name: 'Gemini 4 Argon',
+    tag: 'Argon • Requires Paid Plan',
+    description: 'Frontier Google Argon model. Note: Google sets limit: 0 on Free Tier accounts (requires billing attached in Google Cloud).',
     isLatest: true,
   },
   {
@@ -38,42 +45,11 @@ export const AVAILABLE_GEMINI_MODELS: GeminiModelOption[] = [
     isLatest: true,
   },
   {
-    id: 'gemini-2.5-flash',
-    name: 'Gemini 2.5 Flash',
-    tag: 'Recommended • Fast',
-    description: 'Flagship stable model with balanced intelligence and sub-second response latency.',
-    isLatest: true,
-  },
-  {
     id: 'gemini-2.5-pro',
     name: 'Gemini 2.5 Pro',
     tag: 'Deep Reasoning',
     description: 'Advanced reasoning, deep logic, coding, and multi-step math calculations.',
     isLatest: true,
-  },
-  {
-    id: 'gemini-2.0-flash',
-    name: 'Gemini 2.0 Flash',
-    tag: 'Fast Multimodal',
-    description: 'High-throughput, responsive model for general utility workflows.',
-  },
-  {
-    id: 'gemini-2.0-flash-lite',
-    name: 'Gemini 2.0 Flash Lite',
-    tag: 'Ultra Lightweight',
-    description: 'Maximum processing speed with minimal token overhead.',
-  },
-  {
-    id: 'gemini-1.5-flash',
-    name: 'Gemini 1.5 Flash',
-    tag: '1M Context',
-    description: 'High-capacity context window with proven stability.',
-  },
-  {
-    id: 'gemini-1.5-pro',
-    name: 'Gemini 1.5 Pro',
-    tag: 'High Capacity',
-    description: 'Complex multimodal document understanding.',
   },
 ];
 
@@ -276,8 +252,8 @@ Key Tool Categories & Paths:
 
 const FALLBACK_MODEL_CHAIN = [
   'gemini-2.5-flash',
-  'gemini-2.0-flash',
-  'gemini-1.5-flash',
+  'gemini-3.8-flash',
+  'gemini-3.7-flash',
   'gemini-2.5-pro',
 ];
 
@@ -381,20 +357,57 @@ export async function callGeminiApi(
   const effectiveKey = apiKey.trim() || getEffectiveApiKey();
   const initialModel = normalizeModelId(model.trim() || getPreferredModel());
 
+  // 1. Try initial requested model
   try {
     return await executeGeminiRequest(effectiveKey, initialModel, userMessage, conversationHistory);
   } catch (err: any) {
-    console.warn(`Request with ${initialModel} failed:`, err?.message);
+    const errorMsg = err?.message || '';
+    console.warn(`Request with ${initialModel} failed:`, errorMsg);
 
-    // If using user's custom key and they chose a specific model, try the fallback chain
+    const isQuotaOrModelUnavailable =
+      errorMsg.includes('limit: 0') ||
+      errorMsg.includes('Quota exceeded') ||
+      errorMsg.includes('Free Tier') ||
+      errorMsg.includes('free_tier') ||
+      errorMsg.includes('no longer available') ||
+      errorMsg.includes('404') ||
+      errorMsg.includes('429') ||
+      errorMsg.includes('503');
+
+    // 2. Try fallback chain on effectiveKey (e.g. gemini-2.5-flash, gemini-3.8-flash)
     for (const fallback of FALLBACK_MODEL_CHAIN) {
       if (fallback === initialModel) continue;
       try {
         const result = await executeGeminiRequest(effectiveKey, fallback, userMessage, conversationHistory);
+        // If initial model had limit 0 or was unavailable, update preferred model to working fallback
+        if (isQuotaOrModelUnavailable) {
+          savePreferredModel(fallback);
+        }
         return result;
       } catch (fallbackErr: any) {
         console.warn(`Fallback ${fallback} failed:`, fallbackErr?.message);
       }
+    }
+
+    // 3. If user's key itself is exhausted or blocked, seamlessly fall back to backend built-in key
+    if (effectiveKey !== BACKEND_GEMINI_API_KEY && BACKEND_GEMINI_API_KEY) {
+      try {
+        const result = await executeGeminiRequest(
+          BACKEND_GEMINI_API_KEY,
+          DEFAULT_GEMINI_MODEL,
+          userMessage,
+          conversationHistory
+        );
+        return result;
+      } catch (backendErr: any) {
+        console.warn('Backend fallback key also failed:', backendErr?.message);
+      }
+    }
+
+    if (errorMsg.includes('limit: 0') && (errorMsg.includes('argon') || initialModel.includes('argon'))) {
+      throw new Error(
+        `Gemini 4 Argon has limit: 0 on Google's Free Tier (requires a paid Google Cloud account). ToolHub has automatically selected Gemini 2.5 Flash.`
+      );
     }
 
     throw err;
@@ -404,7 +417,12 @@ export async function callGeminiApi(
 export async function testGeminiConnection(
   apiKey: string = getEffectiveApiKey(),
   model: string = DEFAULT_GEMINI_MODEL
-): Promise<{ success: boolean; message: string; modelsCount?: number }> {
+): Promise<{
+  success: boolean;
+  message: string;
+  modelsCount?: number;
+  suggestedModel?: string;
+}> {
   const keyToTest = apiKey.trim() || getEffectiveApiKey();
   const modelToTest = normalizeModelId(model.trim() || getPreferredModel());
 
@@ -436,9 +454,57 @@ export async function testGeminiConnection(
     }
     return { success: false, message: 'Empty response received from Google API.' };
   } catch (err: any) {
+    const errorMsg = err?.message || '';
+
+    // Check if error is due to Free Tier limit: 0 on this specific model
+    const isFreeTierZeroQuota =
+      errorMsg.includes('limit: 0') ||
+      errorMsg.includes('Free Tier') ||
+      errorMsg.includes('Quota exceeded') ||
+      errorMsg.includes('free_tier');
+
+    if (isFreeTierZeroQuota) {
+      // Test with working free-tier models (gemini-2.5-flash) to verify if the key is valid
+      for (const fallbackModel of ['gemini-2.5-flash', 'gemini-3.8-flash']) {
+        if (fallbackModel === modelToTest) continue;
+        try {
+          const fallbackRes = await executeGeminiRequest(
+            keyToTest,
+            fallbackModel,
+            'Test connection. Reply with "OK".'
+          );
+
+          if (fallbackRes) {
+            savePreferredModel(fallbackModel);
+
+            let count = 0;
+            try {
+              const discovered = await fetchAvailableModelsFromKey(keyToTest);
+              count = discovered.length;
+            } catch (e) {}
+
+            return {
+              success: true,
+              suggestedModel: fallbackModel,
+              message: `Your Google API Key is VALID! Note: '${modelToTest}' has limit: 0 on Google's Free Tier (requires billing on Google Cloud). We automatically set your active model to '${fallbackModel}' (100% Free Tier ready)!`,
+              modelsCount: count,
+            };
+          }
+        } catch (fallbackErr) {
+          // Continue testing next fallback
+        }
+      }
+    }
+
+    let cleanMessage = errorMsg;
+    if (cleanMessage.includes('limit: 0') && (cleanMessage.includes('argon') || modelToTest.includes('argon'))) {
+      cleanMessage = `Google API Quota Notice: 'gemini-4-argon' has limit: 0 on Google's Free Tier (requires Google Cloud billing). Please switch to 'Gemini 2.5 Flash', which has full free quota.`;
+    }
+
     return {
       success: false,
-      message: err?.message || 'Failed to connect to Google Gemini API.',
+      message: cleanMessage || 'Failed to connect to Google Gemini API.',
+      suggestedModel: 'gemini-2.5-flash',
     };
   }
 }
