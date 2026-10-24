@@ -79,7 +79,7 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({ isOpen, on
           {/* Search Header Input */}
           <div className="relative border-b border-slate-200 dark:border-slate-800 p-4">
             <div className="flex items-center gap-3">
-              <Search className="w-5 h-5 text-sky-500 flex-shrink-0" />
+              <Search className="w-5 h-5 text-brand-500 flex-shrink-0" />
               <input
                 ref={inputRef}
                 type="text"
@@ -106,7 +106,7 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({ isOpen, on
                 onClick={() => setSelectedCategory('all')}
                 className={`px-2.5 py-1 rounded-lg font-medium transition-colors flex-shrink-0 ${
                   selectedCategory === 'all'
-                    ? 'bg-sky-600 text-white'
+                    ? 'bg-gradient-to-r from-brand-600 to-indigo-600 text-white shadow-xs'
                     : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
                 }`}
               >
@@ -119,7 +119,7 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({ isOpen, on
                   onClick={() => setSelectedCategory(catKey)}
                   className={`px-2.5 py-1 rounded-lg font-medium transition-colors flex-shrink-0 ${
                     selectedCategory === catKey
-                      ? 'bg-sky-600 text-white'
+                      ? 'bg-gradient-to-r from-brand-600 to-indigo-600 text-white shadow-xs'
                       : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
                   }`}
                 >
@@ -151,7 +151,7 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({ isOpen, on
                     onClose();
                     navigate('/ai-assistant');
                   }}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-sky-600 dark:text-sky-400 hover:underline"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-brand-600 dark:text-brand-400 hover:underline"
                 >
                   <Sparkles className="w-3.5 h-3.5" />
                   Ask the AI Assistant to find or build it
@@ -169,7 +169,7 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({ isOpen, on
                     onMouseEnter={() => setSelectedIndex(index)}
                     className={`flex items-center justify-between p-3 rounded-xl cursor-pointer transition-colors ${
                       isSelected
-                        ? 'bg-sky-50 dark:bg-sky-950/40 border border-sky-200 dark:border-sky-800'
+                        ? 'bg-brand-500/10 dark:bg-brand-500/15 border border-brand-400/40 dark:border-brand-500/40 shadow-xs'
                         : 'hover:bg-slate-50 dark:hover:bg-slate-800/50 border border-transparent'
                     }`}
                   >
@@ -189,7 +189,7 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({ isOpen, on
 
                     <div className="flex-shrink-0 flex items-center text-slate-400">
                       {isSelected ? (
-                        <div className="flex items-center gap-1 text-xs text-sky-600 dark:text-sky-400 font-medium">
+                        <div className="flex items-center gap-1 text-xs text-brand-600 dark:text-brand-400 font-medium">
                           <span>Open</span>
                           <CornerDownLeft className="w-3.5 h-3.5" />
                         </div>

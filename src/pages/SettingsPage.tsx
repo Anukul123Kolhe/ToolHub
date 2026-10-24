@@ -65,8 +65,8 @@ export const SettingsPage: React.FC = () => {
             onClick={() => setTheme('light')}
             className={`p-3 rounded-xl border flex items-center gap-3 transition-all cursor-pointer ${
               theme === 'light'
-                ? 'border-sky-500 bg-sky-50/50 dark:bg-sky-950/30 text-sky-700 dark:text-sky-300 font-bold shadow-sm'
-                : 'border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-slate-300'
+                ? 'border-brand-500 bg-brand-50/50 dark:bg-brand-950/30 text-brand-700 dark:text-brand-300 font-bold shadow-xs'
+                : 'border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-brand-300'
             }`}
           >
             <Sun className="w-4 h-4 text-amber-500" />
@@ -78,8 +78,8 @@ export const SettingsPage: React.FC = () => {
             onClick={() => setTheme('dark')}
             className={`p-3 rounded-xl border flex items-center gap-3 transition-all cursor-pointer ${
               theme === 'dark'
-                ? 'border-sky-500 bg-sky-50/50 dark:bg-sky-950/30 text-sky-700 dark:text-sky-300 font-bold shadow-sm'
-                : 'border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-slate-300'
+                ? 'border-brand-500 bg-brand-50/50 dark:bg-brand-950/30 text-brand-700 dark:text-brand-300 font-bold shadow-xs'
+                : 'border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-brand-300'
             }`}
           >
             <Moon className="w-4 h-4 text-indigo-400" />

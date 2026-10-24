@@ -36,7 +36,7 @@ export const PrivacyPage: React.FC = () => {
         </div>
 
         <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-2.5">
-          <div className="w-9 h-9 rounded-xl bg-sky-100 dark:bg-sky-950 flex items-center justify-center text-sky-600">
+          <div className="w-9 h-9 rounded-xl bg-accent-500/10 dark:bg-accent-500/20 flex items-center justify-center text-accent-600 dark:text-accent-400">
             <Cpu className="w-5 h-5" />
           </div>
           <h3 className="font-semibold text-sm text-slate-900 dark:text-slate-100">

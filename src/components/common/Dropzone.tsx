@@ -82,10 +82,10 @@ export const Dropzone: React.FC<DropzoneProps> = ({
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
         onClick={() => fileInputRef.current?.click()}
-        className={`relative flex flex-col items-center justify-center p-8 border-2 border-dashed rounded-xl cursor-pointer transition-all duration-200 text-center ${
+        className={`relative flex flex-col items-center justify-center p-8 border-2 border-dashed rounded-2xl cursor-pointer transition-all duration-200 text-center ${
           isDragOver
-            ? 'border-sky-500 bg-sky-50/50 dark:bg-sky-950/20 scale-[1.01]'
-            : 'border-slate-300 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/40 hover:border-slate-400 dark:hover:border-slate-600'
+            ? 'border-brand-500 bg-brand-50/50 dark:bg-brand-950/30 scale-[1.01] shadow-brand'
+            : 'border-slate-300 dark:border-slate-700/80 bg-white/60 dark:bg-slate-900/40 hover:border-brand-400/60 dark:hover:border-brand-500/40'
         }`}
       >
         <input
@@ -97,7 +97,7 @@ export const Dropzone: React.FC<DropzoneProps> = ({
           className="hidden"
         />
 
-        <div className="p-3 bg-sky-100 dark:bg-sky-950/60 rounded-full text-sky-600 dark:text-sky-400 mb-3">
+        <div className="p-3 bg-brand-500/10 dark:bg-brand-500/20 rounded-2xl text-brand-600 dark:text-brand-400 ring-1 ring-brand-500/20 mb-3 group-hover:scale-105 transition-transform">
           <UploadCloud className="w-7 h-7" />
         </div>
 

@@ -35,7 +35,7 @@ export const AppContent: React.FC = () => {
   }, []);
 
   return (
-    <div className="flex flex-col min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors duration-200">
+    <div className="flex flex-col min-h-screen bg-slate-50/70 dark:bg-[#090d16] text-slate-900 dark:text-slate-100 bg-ambient-mesh transition-colors duration-200">
       <Header
         onOpenSearch={() => setIsSearchOpen(true)}
         onOpenAIAssistant={() => setIsAIAssistantOpen(true)}

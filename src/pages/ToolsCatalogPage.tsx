@@ -42,21 +42,21 @@ export const ToolsCatalogPage: React.FC = () => {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Filter tools..."
-            className="w-full pl-9 pr-3 py-2 text-xs bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500 text-slate-900 dark:text-slate-100 placeholder:text-slate-400"
+            className="w-full pl-9 pr-3 py-2 text-xs bg-white/90 dark:bg-slate-900/90 border border-slate-200/80 dark:border-slate-800/80 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 shadow-2xs"
           />
         </div>
       </div>
 
       {/* Filter controls */}
-      <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-slate-200 dark:border-slate-800">
+      <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-slate-200/80 dark:border-slate-800/80">
         <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs no-scrollbar">
           <button
             type="button"
             onClick={() => setSelectedCategory('all')}
-            className={`px-3 py-1.5 rounded-lg font-medium transition-colors flex-shrink-0 ${
+            className={`px-3 py-1.5 rounded-lg font-medium transition-all flex-shrink-0 ${
               selectedCategory === 'all'
-                ? 'bg-sky-600 text-white'
-                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
+                ? 'bg-gradient-to-r from-brand-600 to-indigo-600 text-white shadow-brand shadow-xs'
+                : 'bg-white/80 dark:bg-slate-900/80 text-slate-600 dark:text-slate-400 hover:bg-brand-50/50 dark:hover:bg-slate-800 border border-slate-200/80 dark:border-slate-800'
             }`}
           >
             All Categories
@@ -66,10 +66,10 @@ export const ToolsCatalogPage: React.FC = () => {
               key={cat.id}
               type="button"
               onClick={() => setSelectedCategory(cat.id)}
-              className={`px-3 py-1.5 rounded-lg font-medium transition-colors flex-shrink-0 ${
+              className={`px-3 py-1.5 rounded-lg font-medium transition-all flex-shrink-0 ${
                 selectedCategory === cat.id
-                  ? 'bg-sky-600 text-white'
-                  : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
+                  ? 'bg-gradient-to-r from-brand-600 to-indigo-600 text-white shadow-brand shadow-xs'
+                  : 'bg-white/80 dark:bg-slate-900/80 text-slate-600 dark:text-slate-400 hover:bg-brand-50/50 dark:hover:bg-slate-800 border border-slate-200/80 dark:border-slate-800'
               }`}
             >
               {cat.name}
@@ -82,7 +82,7 @@ export const ToolsCatalogPage: React.FC = () => {
             type="checkbox"
             checked={offlineOnly}
             onChange={(e) => setOfflineOnly(e.target.checked)}
-            className="rounded border-slate-300 text-sky-600 focus:ring-sky-500"
+            className="rounded border-slate-300 text-brand-600 focus:ring-brand-500"
           />
           <WifiOff className="w-3.5 h-3.5" />
           <span>Offline Capable Only</span>
@@ -96,7 +96,7 @@ export const ToolsCatalogPage: React.FC = () => {
 
       {/* Tools Grid */}
       {filteredTools.length === 0 ? (
-        <div className="text-center py-16 p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-2">
+        <div className="text-center py-16 p-6 rounded-2xl bg-white/90 dark:bg-slate-900/90 border border-slate-200/80 dark:border-slate-800/80 space-y-2">
           <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">
             No utilities match your search criteria.
           </p>
@@ -114,7 +114,7 @@ export const ToolsCatalogPage: React.FC = () => {
               <div
                 key={tool.id}
                 onClick={() => navigate(tool.path)}
-                className="group p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 shadow-sm hover:shadow-md cursor-pointer transition-all flex flex-col justify-between"
+                className="group p-4 rounded-2xl bg-white/90 dark:bg-slate-900/90 border border-slate-200/80 dark:border-slate-800/80 hover:border-brand-300 dark:hover:border-brand-500/40 shadow-sm hover:shadow-xl hover:shadow-brand-500/5 hover:-translate-y-0.5 cursor-pointer transition-all flex flex-col justify-between"
               >
                 <div>
                   <div className="flex items-start justify-between gap-2 mb-2">
@@ -129,7 +129,7 @@ export const ToolsCatalogPage: React.FC = () => {
                       }}
                       className={`p-1 rounded-md transition-colors ${
                         fav
-                          ? 'text-sky-500'
+                          ? 'text-brand-500'
                           : 'text-slate-300 dark:text-slate-600 hover:text-slate-500'
                       }`}
                       title={fav ? 'Remove from bookmarks' : 'Add to bookmarks'}
@@ -138,7 +138,7 @@ export const ToolsCatalogPage: React.FC = () => {
                     </button>
                   </div>
 
-                  <h3 className="font-semibold text-sm text-slate-900 dark:text-slate-100 group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors">
+                  <h3 className="font-semibold text-sm text-slate-900 dark:text-slate-100 group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors">
                     {tool.name}
                   </h3>
                   <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 line-clamp-2 leading-relaxed">
@@ -148,7 +148,7 @@ export const ToolsCatalogPage: React.FC = () => {
 
                 <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-[11px] text-slate-400">
                   <span>In-Browser</span>
-                  <span className="font-semibold text-sky-600 dark:text-sky-400 group-hover:translate-x-0.5 transition-transform">
+                  <span className="font-semibold text-brand-600 dark:text-brand-400 group-hover:translate-x-0.5 transition-transform">
                     Use Tool →
                   </span>
                 </div>

@@ -11,9 +11,9 @@ export const Footer: React.FC = () => {
           <div className="md:col-span-1 space-y-3">
             <div className="flex items-center gap-2">
               <span className="font-bold text-lg text-slate-900 dark:text-white tracking-tight">
-                Tool<span className="text-sky-500">Hub</span>
+                Tool<span className="bg-gradient-to-r from-brand-600 to-accent-500 dark:from-brand-400 dark:to-accent-400 bg-clip-text text-transparent">Hub</span>
               </span>
-              <span className="text-[10px] font-semibold uppercase px-1.5 py-0.5 rounded bg-sky-100 dark:bg-sky-950 text-sky-700 dark:text-sky-400">
+              <span className="text-[10px] font-semibold uppercase px-1.5 py-0.5 rounded bg-brand-500/10 text-brand-600 dark:text-brand-300 border border-brand-500/20">
                 v1.0
               </span>
             </div>
@@ -34,27 +34,27 @@ export const Footer: React.FC = () => {
             </h4>
             <ul className="space-y-2 text-xs text-slate-600 dark:text-slate-400">
               <li>
-                <Link to="/category/pdf" className="hover:text-sky-500 transition-colors">
+                <Link to="/category/pdf" className="hover:text-brand-500 transition-colors">
                   PDF & Document Tools
                 </Link>
               </li>
               <li>
-                <Link to="/category/image" className="hover:text-sky-500 transition-colors">
+                <Link to="/category/image" className="hover:text-brand-500 transition-colors">
                   Image & Photo Utilities
                 </Link>
               </li>
               <li>
-                <Link to="/category/student" className="hover:text-sky-500 transition-colors">
+                <Link to="/category/student" className="hover:text-brand-500 transition-colors">
                   Student & Academic Calculators
                 </Link>
               </li>
               <li>
-                <Link to="/category/developer" className="hover:text-sky-500 transition-colors">
+                <Link to="/category/developer" className="hover:text-brand-500 transition-colors">
                   Developer & Code Tools
                 </Link>
               </li>
               <li>
-                <Link to="/category/calculator" className="hover:text-sky-500 transition-colors">
+                <Link to="/category/calculator" className="hover:text-brand-500 transition-colors">
                   Financial & Everyday Calculators
                 </Link>
               </li>
@@ -68,33 +68,33 @@ export const Footer: React.FC = () => {
             </h4>
             <ul className="space-y-2 text-xs text-slate-600 dark:text-slate-400">
               <li>
-                <Link to="/ai-assistant" className="hover:text-sky-500 flex items-center gap-1.5 transition-colors">
-                  <Sparkles className="w-3.5 h-3.5 text-sky-500" />
+                <Link to="/ai-assistant" className="hover:text-brand-500 flex items-center gap-1.5 transition-colors">
+                  <Sparkles className="w-3.5 h-3.5 text-brand-500" />
                   AI Task Assistant
                 </Link>
               </li>
               <li>
-                <Link to="/tools" className="hover:text-sky-500 transition-colors">
+                <Link to="/tools" className="hover:text-brand-500 transition-colors">
                   Complete 400+ Tool Catalog
                 </Link>
               </li>
               <li>
-                <Link to="/favorites" className="hover:text-sky-500 transition-colors">
+                <Link to="/favorites" className="hover:text-brand-500 transition-colors">
                   Bookmarked Utilities
                 </Link>
               </li>
               <li>
-                <Link to="/history" className="hover:text-sky-500 transition-colors">
+                <Link to="/history" className="hover:text-brand-500 transition-colors">
                   Activity History
                 </Link>
               </li>
               <li>
-                <Link to="/settings" className="hover:text-sky-500 transition-colors">
+                <Link to="/settings" className="hover:text-brand-500 transition-colors">
                   Settings & API Key
                 </Link>
               </li>
               <li>
-                <Link to="/privacy" className="hover:text-sky-500 transition-colors">
+                <Link to="/privacy" className="hover:text-brand-500 transition-colors">
                   Privacy Architecture
                 </Link>
               </li>

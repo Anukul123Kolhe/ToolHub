@@ -24,15 +24,15 @@ export const Button: React.FC<ButtonProps> = ({
 
   const variants = {
     primary:
-      'bg-sky-600 hover:bg-sky-700 text-white shadow-sm focus:ring-sky-500 dark:bg-sky-500 dark:hover:bg-sky-600',
+      'bg-gradient-to-r from-brand-600 via-indigo-600 to-brand-700 hover:from-brand-500 hover:via-indigo-500 hover:to-brand-600 text-white shadow-md shadow-brand-500/25 hover:shadow-brand focus:ring-brand-500',
     secondary:
-      'bg-slate-200 hover:bg-slate-300 text-slate-800 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-200 focus:ring-slate-400',
+      'bg-slate-100 hover:bg-slate-200 text-slate-800 dark:bg-slate-800/90 dark:hover:bg-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700/80 focus:ring-brand-400',
     outline:
-      'border border-slate-300 hover:bg-slate-100 text-slate-700 dark:border-slate-700 dark:hover:bg-slate-800 dark:text-slate-200 focus:ring-slate-400',
+      'border border-slate-300/80 hover:border-brand-500/50 hover:bg-brand-50/50 text-slate-700 dark:border-slate-700 dark:hover:border-brand-400/50 dark:hover:bg-brand-950/30 dark:text-slate-200 focus:ring-brand-400',
     ghost:
-      'text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100 focus:ring-slate-400',
+      'text-slate-600 hover:bg-brand-50/50 hover:text-brand-600 dark:text-slate-400 dark:hover:bg-brand-950/30 dark:hover:text-brand-300 focus:ring-brand-400',
     danger:
-      'bg-rose-600 hover:bg-rose-700 text-white shadow-sm focus:ring-rose-500 dark:bg-rose-500 dark:hover:bg-rose-600',
+      'bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-500 hover:to-red-500 text-white shadow-md shadow-rose-500/20 focus:ring-rose-500',
   };
 
   const sizes = {
