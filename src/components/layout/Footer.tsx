@@ -4,16 +4,16 @@ import { ShieldCheck, Heart, Github, Lock, Cpu, Sparkles } from 'lucide-react';
 
 export const Footer: React.FC = () => {
   return (
-    <footer className="w-full border-t border-teal-100/80 dark:border-teal-950/80 bg-white/95 dark:bg-[#061317] mt-auto transition-colors">
+    <footer className="w-full border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0B0F17] mt-auto transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
           {/* Brand Info */}
           <div className="md:col-span-1 space-y-3">
             <div className="flex items-center gap-2">
-              <span className="font-bold text-lg text-slate-900 dark:text-white tracking-tight">
-                Tool<span className="bg-gradient-to-r from-emerald-600 via-teal-500 to-cyan-500 dark:from-emerald-400 dark:to-cyan-300 bg-clip-text text-transparent">Hub</span>
+              <span className="font-black text-lg text-[#0F172A] dark:text-white tracking-tight">
+                Tool<span className="text-blue-600 dark:text-blue-400">Hub</span>
               </span>
-              <span className="text-[10px] font-semibold uppercase px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20">
+              <span className="text-[10px] font-semibold uppercase px-1.5 py-0.5 rounded bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-200 border border-slate-300 dark:border-slate-700 font-bold">
                 v1.0
               </span>
             </div>
@@ -21,7 +21,7 @@ export const Footer: React.FC = () => {
               An AI-powered, privacy-first, unified online utility platform. Every file is processed
               locally inside your browser. No server uploads. No ads. No fees.
             </p>
-            <div className="flex items-center gap-2 text-xs text-emerald-600 dark:text-emerald-400 font-medium">
+            <div className="flex items-center gap-2 text-xs text-emerald-700 dark:text-emerald-400 font-bold">
               <ShieldCheck className="w-4 h-4" />
               <span>Zero-Upload Guarantee</span>
             </div>
@@ -34,27 +34,27 @@ export const Footer: React.FC = () => {
             </h4>
             <ul className="space-y-2 text-xs text-slate-600 dark:text-slate-400">
               <li>
-                <Link to="/category/pdf" className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">
+                <Link to="/category/pdf" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
                   PDF & Document Tools
                 </Link>
               </li>
               <li>
-                <Link to="/category/image" className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">
+                <Link to="/category/image" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
                   Image & Photo Utilities
                 </Link>
               </li>
               <li>
-                <Link to="/category/student" className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">
+                <Link to="/category/student" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
                   Student & Academic Calculators
                 </Link>
               </li>
               <li>
-                <Link to="/category/developer" className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">
+                <Link to="/category/developer" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
                   Developer & Code Tools
                 </Link>
               </li>
               <li>
-                <Link to="/category/calculator" className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">
+                <Link to="/category/calculator" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
                   Financial & Everyday Calculators
                 </Link>
               </li>
@@ -68,33 +68,33 @@ export const Footer: React.FC = () => {
             </h4>
             <ul className="space-y-2 text-xs text-slate-600 dark:text-slate-400">
               <li>
-                <Link to="/ai-assistant" className="hover:text-emerald-600 dark:hover:text-emerald-400 flex items-center gap-1.5 transition-colors">
+                <Link to="/ai-assistant" className="hover:text-blue-600 dark:hover:text-blue-400 flex items-center gap-1.5 transition-colors">
                   <Sparkles className="w-3.5 h-3.5 text-emerald-500" />
                   AI Task Assistant
                 </Link>
               </li>
               <li>
-                <Link to="/tools" className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">
+                <Link to="/tools" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
                   Complete 400+ Tool Catalog
                 </Link>
               </li>
               <li>
-                <Link to="/favorites" className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">
+                <Link to="/favorites" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
                   Bookmarked Utilities
                 </Link>
               </li>
               <li>
-                <Link to="/history" className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">
+                <Link to="/history" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
                   Activity History
                 </Link>
               </li>
               <li>
-                <Link to="/settings" className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">
+                <Link to="/settings" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
                   Settings & API Key
                 </Link>
               </li>
               <li>
-                <Link to="/privacy" className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">
+                <Link to="/privacy" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
                   Privacy Architecture
                 </Link>
               </li>

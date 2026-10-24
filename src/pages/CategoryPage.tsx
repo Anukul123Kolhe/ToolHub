@@ -41,13 +41,13 @@ export const CategoryPage: React.FC = () => {
       <Breadcrumbs items={[{ label: 'Categories', path: '/tools' }, { label: category.name }]} />
 
       {/* Category Header Banner */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-950 via-teal-950 to-slate-950 p-8 text-white shadow-xl shadow-emerald-950/40 border border-emerald-500/20">
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-700 via-indigo-700 to-slate-900 p-8 text-white shadow-xl shadow-blue-900/20 border border-blue-500/20">
         <div className="relative z-10 max-w-2xl space-y-2">
           <Badge variant="info" size="sm">
             {categoryTools.length} Available Tools
           </Badge>
           <h1 className="text-3xl font-extrabold tracking-tight">{category.name}</h1>
-          <p className="text-xs text-emerald-100 leading-relaxed">{category.description}</p>
+          <p className="text-xs text-blue-100 leading-relaxed">{category.description}</p>
         </div>
       </div>
 
@@ -65,7 +65,7 @@ export const CategoryPage: React.FC = () => {
               <div
                 key={tool.id}
                 onClick={() => navigate(tool.path)}
-                className="group p-4 rounded-2xl bg-white/90 dark:bg-slate-900/90 border border-slate-200/80 dark:border-slate-800/80 hover:border-emerald-300 dark:hover:border-emerald-500/40 shadow-sm hover:shadow-xl hover:shadow-emerald-500/10 hover:-translate-y-0.5 cursor-pointer transition-all flex flex-col justify-between"
+                className="group p-4 rounded-2xl bg-white/90 dark:bg-slate-900/90 border border-slate-200/80 dark:border-slate-800/80 hover:border-blue-500 dark:hover:border-blue-400 shadow-sm hover:shadow-lg hover:shadow-blue-500/10 hover:-translate-y-0.5 cursor-pointer transition-all flex flex-col justify-between"
               >
                 <div>
                   <div className="flex items-start justify-between gap-2 mb-2">
@@ -80,7 +80,7 @@ export const CategoryPage: React.FC = () => {
                       }}
                       className={`p-1 rounded-md transition-colors ${
                         fav
-                          ? 'text-emerald-500'
+                          ? 'text-amber-500'
                           : 'text-slate-300 dark:text-slate-600 hover:text-slate-500'
                       }`}
                       title={fav ? 'Remove from bookmarks' : 'Add to bookmarks'}
@@ -89,7 +89,7 @@ export const CategoryPage: React.FC = () => {
                     </button>
                   </div>
 
-                  <h3 className="font-semibold text-sm text-slate-900 dark:text-slate-100 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
+                  <h3 className="font-bold text-sm text-[#0F172A] dark:text-slate-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
                     {tool.name}
                   </h3>
                   <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 line-clamp-2 leading-relaxed">
@@ -99,7 +99,7 @@ export const CategoryPage: React.FC = () => {
 
                 <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-[11px] text-slate-400">
                   <span>In-Browser</span>
-                  <span className="font-semibold text-emerald-600 dark:text-emerald-400 group-hover:translate-x-0.5 transition-transform">
+                  <span className="font-semibold text-blue-600 dark:text-blue-400 font-bold group-hover:translate-x-0.5 transition-transform">
                     Open Tool →
                   </span>
                 </div>

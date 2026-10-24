@@ -42,7 +42,7 @@ export const ToolsCatalogPage: React.FC = () => {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Filter tools..."
-            className="w-full pl-9 pr-3 py-2 text-xs bg-white/90 dark:bg-slate-900/90 border border-slate-200/80 dark:border-slate-800/80 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 shadow-2xs"
+            className="w-full pl-9 pr-3 py-2 text-xs bg-white/90 dark:bg-slate-900/90 border border-slate-200/80 dark:border-slate-800/80 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-[#0F172A] dark:text-slate-100 placeholder:text-slate-400 shadow-2xs"
           />
         </div>
       </div>
@@ -55,8 +55,8 @@ export const ToolsCatalogPage: React.FC = () => {
             onClick={() => setSelectedCategory('all')}
             className={`px-3 py-1.5 rounded-lg font-medium transition-all flex-shrink-0 ${
               selectedCategory === 'all'
-                ? 'bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 text-white shadow-sm shadow-emerald-500/25'
-                : 'bg-white/80 dark:bg-slate-900/80 text-slate-600 dark:text-slate-400 hover:bg-emerald-50/50 dark:hover:bg-slate-800 border border-slate-200/80 dark:border-slate-800'
+                ? 'bg-gradient-to-r bg-blue-600 text-white font-bold shadow-md shadow-blue-500/25'
+                : 'bg-white/80 dark:bg-slate-900/80 text-slate-600 dark:text-slate-400 hover:bg-blue-50/60 dark:hover:bg-blue-950/40 dark:hover:bg-slate-800 border border-slate-200/80 dark:border-slate-800'
             }`}
           >
             All Categories
@@ -68,8 +68,8 @@ export const ToolsCatalogPage: React.FC = () => {
               onClick={() => setSelectedCategory(cat.id)}
               className={`px-3 py-1.5 rounded-lg font-medium transition-all flex-shrink-0 ${
                 selectedCategory === cat.id
-                  ? 'bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 text-white shadow-sm shadow-emerald-500/25'
-                  : 'bg-white/80 dark:bg-slate-900/80 text-slate-600 dark:text-slate-400 hover:bg-emerald-50/50 dark:hover:bg-slate-800 border border-slate-200/80 dark:border-slate-800'
+                  ? 'bg-gradient-to-r bg-blue-600 text-white font-bold shadow-md shadow-blue-500/25'
+                  : 'bg-white/80 dark:bg-slate-900/80 text-slate-600 dark:text-slate-400 hover:bg-blue-50/60 dark:hover:bg-blue-950/40 dark:hover:bg-slate-800 border border-slate-200/80 dark:border-slate-800'
               }`}
             >
               {cat.name}
@@ -82,7 +82,7 @@ export const ToolsCatalogPage: React.FC = () => {
             type="checkbox"
             checked={offlineOnly}
             onChange={(e) => setOfflineOnly(e.target.checked)}
-            className="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+            className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
           />
           <WifiOff className="w-3.5 h-3.5" />
           <span>Offline Capable Only</span>
@@ -114,7 +114,7 @@ export const ToolsCatalogPage: React.FC = () => {
               <div
                 key={tool.id}
                 onClick={() => navigate(tool.path)}
-                className="group p-4 rounded-2xl bg-white/90 dark:bg-slate-900/90 border border-slate-200/80 dark:border-slate-800/80 hover:border-emerald-300 dark:hover:border-emerald-500/40 shadow-sm hover:shadow-xl hover:shadow-emerald-500/10 hover:-translate-y-0.5 cursor-pointer transition-all flex flex-col justify-between"
+                className="group p-4 rounded-2xl bg-white/90 dark:bg-slate-900/90 border border-slate-200/80 dark:border-slate-800/80 hover:border-blue-500 dark:hover:border-blue-400 shadow-sm hover:shadow-lg hover:shadow-blue-500/10 hover:-translate-y-0.5 cursor-pointer transition-all flex flex-col justify-between"
               >
                 <div>
                   <div className="flex items-start justify-between gap-2 mb-2">
@@ -129,7 +129,7 @@ export const ToolsCatalogPage: React.FC = () => {
                       }}
                       className={`p-1 rounded-md transition-colors ${
                         fav
-                          ? 'text-emerald-500'
+                          ? 'text-amber-500'
                           : 'text-slate-300 dark:text-slate-600 hover:text-slate-500'
                       }`}
                       title={fav ? 'Remove from bookmarks' : 'Add to bookmarks'}
@@ -138,7 +138,7 @@ export const ToolsCatalogPage: React.FC = () => {
                     </button>
                   </div>
 
-                  <h3 className="font-semibold text-sm text-slate-900 dark:text-slate-100 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
+                  <h3 className="font-bold text-sm text-[#0F172A] dark:text-slate-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
                     {tool.name}
                   </h3>
                   <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 line-clamp-2 leading-relaxed">
@@ -148,7 +148,7 @@ export const ToolsCatalogPage: React.FC = () => {
 
                 <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-[11px] text-slate-400">
                   <span>In-Browser</span>
-                  <span className="font-semibold text-emerald-600 dark:text-emerald-400 group-hover:translate-x-0.5 transition-transform">
+                  <span className="font-semibold text-blue-600 dark:text-blue-400 font-bold group-hover:translate-x-0.5 transition-transform">
                     Use Tool →
                   </span>
                 </div>

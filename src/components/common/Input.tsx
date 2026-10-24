@@ -42,7 +42,7 @@ export const Input: React.FC<InputProps> = ({
             clsx(
               'block w-full rounded-lg border bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-sm transition-colors duration-150',
               'placeholder:text-slate-400 dark:placeholder:text-slate-500',
-              'focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500',
+              'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 border-slate-300 dark:border-slate-700 font-medium',
               icon ? 'pl-9 pr-3 py-2' : 'px-3 py-2',
               error
                 ? 'border-rose-300 text-rose-900 focus:ring-rose-500 focus:border-rose-500 dark:border-rose-700'
