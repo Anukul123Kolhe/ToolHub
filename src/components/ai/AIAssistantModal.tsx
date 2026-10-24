@@ -135,7 +135,7 @@ export const AIAssistantModal: React.FC<AIAssistantModalProps> = ({ isOpen, onCl
           <div className="flex items-center justify-between px-4 py-3 border-b border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900 select-none">
             {/* Top Left: Clean Title & Icon (model name removed) */}
             <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-lg bg-brand-500/10 dark:bg-brand-500/20 flex items-center justify-center text-brand-500 shadow-2xs">
+              <div className="w-7 h-7 rounded-lg bg-emerald-500/10 dark:bg-emerald-500/20 flex items-center justify-center text-emerald-500 shadow-2xs">
                 <Sparkles className="w-4 h-4" />
               </div>
               <span className="font-semibold text-sm text-slate-900 dark:text-slate-100 tracking-tight">
@@ -182,7 +182,7 @@ export const AIAssistantModal: React.FC<AIAssistantModalProps> = ({ isOpen, onCl
             {/* Empty State / Welcome Screen */}
             {messages.length === 0 && (
               <div className="h-full flex flex-col items-center justify-center text-center max-w-lg mx-auto py-8 space-y-6">
-                <div className="w-12 h-12 rounded-full bg-brand-500/10 dark:bg-brand-500/20 flex items-center justify-center text-brand-500 shadow-xs">
+                <div className="w-12 h-12 rounded-full bg-emerald-500/10 dark:bg-emerald-500/20 flex items-center justify-center text-emerald-500 shadow-xs">
                   <Sparkles className="w-6 h-6" />
                 </div>
 
@@ -202,7 +202,7 @@ export const AIAssistantModal: React.FC<AIAssistantModalProps> = ({ isOpen, onCl
                       key={idx}
                       type="button"
                       onClick={() => handleSend(p.title)}
-                      className="p-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-white/60 dark:bg-slate-800/40 hover:bg-brand-50/50 dark:hover:bg-brand-950/20 hover:border-brand-300 dark:hover:border-brand-700 text-left transition-all"
+                      className="p-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-white/60 dark:bg-slate-800/40 hover:bg-emerald-50/50 dark:hover:bg-emerald-950/30 hover:border-emerald-300 dark:hover:border-emerald-700 text-left transition-all"
                     >
                       <p className="text-xs font-semibold text-slate-800 dark:text-slate-200">{p.title}</p>
                       <p className="text-[11px] text-slate-400 mt-0.5">{p.desc}</p>
@@ -233,7 +233,7 @@ export const AIAssistantModal: React.FC<AIAssistantModalProps> = ({ isOpen, onCl
             {/* Typing / Generating Indicator */}
             {isLoading && (
               <div className="flex gap-3 text-xs sm:text-sm">
-                <div className="w-6 h-6 rounded-full bg-brand-500/10 dark:bg-brand-500/20 flex items-center justify-center text-brand-500 shrink-0">
+                <div className="w-6 h-6 rounded-full bg-emerald-500/10 dark:bg-emerald-500/20 flex items-center justify-center text-emerald-500 shrink-0">
                   <Sparkles className="w-3.5 h-3.5" />
                 </div>
                 <div className="flex items-center gap-1 py-1.5">
@@ -249,7 +249,7 @@ export const AIAssistantModal: React.FC<AIAssistantModalProps> = ({ isOpen, onCl
 
           {/* ChatGPT Style Floating Input Box */}
           <div className="p-3 sm:p-4 border-t border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900 space-y-2">
-            <div className="relative flex items-center rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50/70 dark:bg-slate-800/60 focus-within:border-brand-500 dark:focus-within:border-brand-400 focus-within:ring-2 focus-within:ring-brand-500/20 focus-within:bg-white dark:focus-within:bg-slate-800 transition-all shadow-xs">
+            <div className="relative flex items-center rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50/70 dark:bg-slate-800/60 focus-within:border-emerald-500 dark:focus-within:border-emerald-400 focus-within:ring-2 focus-within:ring-emerald-500/20 focus-within:bg-white dark:focus-within:bg-slate-800 transition-all shadow-xs">
               <input
                 ref={inputRef}
                 type="text"
@@ -266,7 +266,7 @@ export const AIAssistantModal: React.FC<AIAssistantModalProps> = ({ isOpen, onCl
                 disabled={!inputText.trim() || isLoading}
                 className={`mr-2 p-2 rounded-xl transition-all ${
                   inputText.trim() && !isLoading
-                    ? 'bg-gradient-to-r from-brand-600 to-indigo-600 text-white shadow-brand shadow-xs hover:scale-105'
+                    ? 'bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 text-white shadow-md shadow-emerald-500/25 hover:scale-105'
                     : 'bg-slate-200 dark:bg-slate-700 text-slate-400 cursor-not-allowed'
                 }`}
                 title="Send message"

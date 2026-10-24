@@ -867,8 +867,8 @@ export const GenericToolWorkspace: React.FC<GenericToolWorkspaceProps> = ({ tool
     <div className="space-y-6">
       {/* 1. Exam & Passport Photo Specialist UI */}
       {isExamPassport && (
-        <Card className="p-6 space-y-6 border-brand-200 dark:border-brand-800 bg-brand-50/20 dark:bg-brand-950/10">
-          <div className="flex items-center gap-2 text-brand-700 dark:text-brand-300 font-bold text-sm">
+        <Card className="p-6 space-y-6 border-emerald-200 dark:border-emerald-800 bg-emerald-50/30 dark:bg-emerald-950/20">
+          <div className="flex items-center gap-2 text-emerald-700 dark:text-emerald-300 font-bold text-sm">
             <Camera className="w-5 h-5" />
             <span>Official Examination & Passport Photo Configuration</span>
           </div>
@@ -946,7 +946,7 @@ export const GenericToolWorkspace: React.FC<GenericToolWorkspaceProps> = ({ tool
                         type="button"
                         onClick={() => setPassportBgColor(b.color)}
                         className={`px-3 py-1.5 rounded-lg text-xs font-semibold border flex items-center gap-1.5 ${
-                          passportBgColor === b.color ? 'ring-2 ring-brand-500 font-bold border-brand-400' : ''
+                          passportBgColor === b.color ? 'ring-2 ring-emerald-500 font-bold border-emerald-400' : ''
                         }`}
                       >
                         <span className="w-3.5 h-3.5 rounded-full border" style={{ backgroundColor: b.color }} />
@@ -974,7 +974,7 @@ export const GenericToolWorkspace: React.FC<GenericToolWorkspaceProps> = ({ tool
       {/* 2. Interactive Calculator Specialist UI */}
       {isCalculator && !isExamPassport && (
         <Card className="p-6 space-y-6">
-          <div className="flex items-center gap-2 text-indigo-700 dark:text-indigo-400 font-bold text-sm">
+          <div className="flex items-center gap-2 text-teal-700 dark:text-teal-300 font-bold text-sm">
             <Activity className="w-5 h-5" />
             <span>Interactive Mathematical & Engineering Engine</span>
           </div>
@@ -1109,7 +1109,7 @@ export const GenericToolWorkspace: React.FC<GenericToolWorkspaceProps> = ({ tool
                   if (cpsTimeLeft > 0) setCpsClicks((c) => c + 1);
                 }}
                 disabled={cpsTimeLeft === 0}
-                className="w-full max-w-md h-36 rounded-2xl bg-gradient-to-r from-brand-600 via-indigo-600 to-accent-500 text-white font-extrabold text-2xl active:scale-95 transition-transform flex items-center justify-center shadow-brand"
+                className="w-full max-w-md h-36 rounded-2xl bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 text-white font-extrabold text-2xl active:scale-95 transition-transform flex items-center justify-center shadow-lg shadow-emerald-500/25"
               >
                 {cpsTimeLeft === 0 ? 'Test Finished!' : cpsActive ? 'CLICK FAST!' : 'CLICK TO START'}
               </button>
@@ -1141,7 +1141,7 @@ export const GenericToolWorkspace: React.FC<GenericToolWorkspaceProps> = ({ tool
                 max="2000"
                 value={toneFrequency}
                 onChange={(e) => setToneFrequency(Number(e.target.value))}
-                className="w-full accent-brand-500"
+                className="w-full accent-emerald-500"
               />
               <div className="flex justify-center gap-2">
                 {(['sine', 'square', 'triangle', 'sawtooth'] as OscillatorType[]).map((w) => (
@@ -1150,7 +1150,7 @@ export const GenericToolWorkspace: React.FC<GenericToolWorkspaceProps> = ({ tool
                     type="button"
                     onClick={() => setToneWaveform(w)}
                     className={`px-3 py-1 rounded text-xs capitalize border ${
-                      toneWaveform === w ? 'bg-gradient-to-r from-brand-600 to-indigo-600 text-white shadow-xs' : 'bg-slate-100 dark:bg-slate-800'
+                      toneWaveform === w ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-xs' : 'bg-slate-100 dark:bg-slate-800'
                     }`}
                   >
                     {w}
@@ -1227,8 +1227,8 @@ export const GenericToolWorkspace: React.FC<GenericToolWorkspaceProps> = ({ tool
       {/* 4. Chart & Graph Specialist UI */}
       {isChart && (
         <Card className="p-6 space-y-4">
-          <div className="flex items-center gap-2 text-brand-700 dark:text-brand-300 font-bold text-sm">
-            <BarChart3 className="w-5 h-5 text-brand-500" />
+          <div className="flex items-center gap-2 text-emerald-700 dark:text-emerald-300 font-bold text-sm">
+            <BarChart3 className="w-5 h-5 text-emerald-500" />
             <span>Interactive Chart & Graph Studio</span>
           </div>
 
@@ -1259,7 +1259,7 @@ export const GenericToolWorkspace: React.FC<GenericToolWorkspaceProps> = ({ tool
                       <div key={idx} className="flex-1 flex flex-col items-center gap-1 h-full justify-end">
                         <span className="text-[9px] font-mono text-slate-400">{val}</span>
                         <div
-                          className="w-full max-w-[40px] bg-gradient-to-t from-brand-600 via-indigo-600 to-accent-500 rounded-t"
+                          className="w-full max-w-[40px] bg-gradient-to-t from-emerald-600 via-teal-600 to-cyan-500 rounded-t"
                           style={{ height: `${heightPercent}%` }}
                         />
                         <span className="text-[10px] font-semibold truncate max-w-[50px]">{lbl}</span>
@@ -1304,7 +1304,7 @@ export const GenericToolWorkspace: React.FC<GenericToolWorkspaceProps> = ({ tool
           {/* Action Trigger Card */}
           <Card className="p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-2 text-xs text-slate-500">
-              <Info className="w-4 h-4 text-brand-500 flex-shrink-0" />
+              <Info className="w-4 h-4 text-emerald-500 flex-shrink-0" />
               <span>100% Client-side in-browser execution • Zero data leaves device</span>
             </div>
 

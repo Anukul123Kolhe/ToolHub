@@ -65,16 +65,16 @@ export const HomePage: React.FC<HomePageProps> = ({ onOpenSearch, onOpenAIAssist
       {/* Hero Section */}
       <section className="relative pt-8 sm:pt-14 text-center max-w-4xl mx-auto px-4">
         {/* Subtle decorative glow */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[34rem] h-[22rem] bg-gradient-to-tr from-brand-500/20 via-purple-500/15 to-accent-400/20 rounded-full blur-3xl pointer-events-none -z-10" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[34rem] h-[22rem] bg-gradient-to-tr from-emerald-500/25 via-teal-400/20 to-cyan-400/25 rounded-full blur-3xl pointer-events-none -z-10" />
 
-        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-brand-500/10 dark:bg-brand-500/15 border border-brand-500/30 text-xs font-semibold text-brand-700 dark:text-brand-300 mb-6 backdrop-blur-sm shadow-xs">
-          <Sparkles className="w-3.5 h-3.5 text-brand-500 animate-pulse" />
+        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/10 dark:bg-emerald-500/15 border border-emerald-500/30 text-xs font-semibold text-emerald-800 dark:text-emerald-300 mb-6 backdrop-blur-sm shadow-xs">
+          <Sparkles className="w-3.5 h-3.5 text-emerald-500 animate-pulse" />
           <span>Unified Online Utility Platform • 400+ Working Tools</span>
         </div>
 
         <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-[1.15]">
           Every online tool you need. <br />
-          <span className="bg-gradient-to-r from-brand-600 via-indigo-600 to-accent-500 dark:from-brand-400 dark:via-indigo-300 dark:to-accent-300 bg-clip-text text-transparent">
+          <span className="bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 dark:from-emerald-400 dark:via-teal-300 dark:to-cyan-300 bg-clip-text text-transparent">
             100% in your browser.
           </span>
         </h1>
@@ -87,10 +87,10 @@ export const HomePage: React.FC<HomePageProps> = ({ onOpenSearch, onOpenAIAssist
         <div className="mt-8 max-w-2xl mx-auto">
           <div
             onClick={onOpenSearch}
-            className="flex items-center justify-between p-4 bg-white/90 dark:bg-slate-900/90 border-2 border-slate-200/80 dark:border-slate-800/80 hover:border-brand-500 dark:hover:border-brand-400 rounded-2xl shadow-xl shadow-brand-500/5 dark:shadow-none cursor-pointer transition-all group backdrop-blur-sm"
+            className="flex items-center justify-between p-4 bg-white/90 dark:bg-slate-900/90 border-2 border-slate-200/80 dark:border-slate-800/80 hover:border-emerald-500 dark:hover:border-emerald-400 rounded-2xl shadow-xl shadow-emerald-500/10 dark:shadow-none cursor-pointer transition-all group backdrop-blur-sm"
           >
             <div className="flex items-center gap-3 text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300 transition-colors">
-              <Search className="w-5 h-5 text-brand-500 group-hover:scale-110 transition-transform" />
+              <Search className="w-5 h-5 text-emerald-500 group-hover:scale-110 transition-transform" />
               <span className="text-sm font-medium">
                 Search 400+ tools (e.g., "compress image", "pdf merge", "sgpa")...
               </span>
@@ -108,7 +108,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onOpenSearch, onOpenAIAssist
                 key={idx}
                 type="button"
                 onClick={() => navigate(pill.path)}
-                className="px-3 py-1 rounded-full bg-white/80 dark:bg-slate-900/80 hover:bg-brand-50 dark:hover:bg-brand-950/40 hover:text-brand-600 dark:hover:text-brand-400 hover:border-brand-300 dark:hover:border-brand-700 text-slate-600 dark:text-slate-300 transition-colors border border-slate-200 dark:border-slate-700/80 shadow-2xs"
+                className="px-3 py-1 rounded-full bg-white/80 dark:bg-slate-900/80 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 hover:text-emerald-700 dark:hover:text-emerald-300 hover:border-emerald-300 dark:hover:border-emerald-700 text-slate-600 dark:text-slate-300 transition-colors border border-slate-200 dark:border-slate-700/80 shadow-2xs"
               >
                 {pill.label}
               </button>
@@ -119,7 +119,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onOpenSearch, onOpenAIAssist
 
       {/* AI Assistant Banner */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-brand-700 via-indigo-700 to-purple-800 p-8 text-white shadow-brand-lg">
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-emerald-700 via-teal-700 to-cyan-800 p-8 text-white shadow-brand-lg">
           <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
             <div className="space-y-2 max-w-2xl">
               <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-white/20 text-white text-xs font-semibold backdrop-blur-sm">
@@ -129,14 +129,14 @@ export const HomePage: React.FC<HomePageProps> = ({ onOpenSearch, onOpenAIAssist
               <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">
                 AI Task Assistant & Tool Orchestrator
               </h2>
-              <p className="text-sm text-brand-100 leading-relaxed">
+              <p className="text-sm text-emerald-100 leading-relaxed">
                 Tell the assistant what you need in plain English. Attach your files and let ToolHub parameterize and execute the right browser tools for you safely and sequentially.
               </p>
             </div>
             <button
               type="button"
               onClick={onOpenAIAssistant}
-              className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-white text-brand-700 hover:bg-brand-50 font-semibold text-sm shadow-md transition-all active:scale-95 flex-shrink-0"
+              className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-white text-emerald-800 hover:bg-emerald-50 font-semibold text-sm shadow-md transition-all active:scale-95 flex-shrink-0"
             >
               <span>Launch AI Assistant</span>
               <ArrowRight className="w-4 h-4" />
@@ -172,8 +172,8 @@ export const HomePage: React.FC<HomePageProps> = ({ onOpenSearch, onOpenAIAssist
             </p>
           </div>
 
-          <div className="p-6 rounded-2xl bg-white/90 dark:bg-slate-900/90 border border-slate-200/80 dark:border-slate-800/80 shadow-sm space-y-3 hover:border-brand-500/30 transition-all">
-            <div className="w-10 h-10 rounded-xl bg-brand-500/10 dark:bg-brand-500/20 flex items-center justify-center text-brand-600 dark:text-brand-400">
+          <div className="p-6 rounded-2xl bg-white/90 dark:bg-slate-900/90 border border-slate-200/80 dark:border-slate-800/80 shadow-sm space-y-3 hover:border-emerald-500/30 transition-all">
+            <div className="w-10 h-10 rounded-xl bg-emerald-500/10 dark:bg-emerald-500/20 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
               <Lock className="w-5 h-5" />
             </div>
             <h3 className="font-semibold text-base text-slate-900 dark:text-slate-100">
@@ -199,7 +199,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onOpenSearch, onOpenAIAssist
           </div>
           <Link
             to="/tools"
-            className="text-xs font-semibold text-brand-600 dark:text-brand-400 hover:underline flex items-center gap-1"
+            className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:underline flex items-center gap-1"
           >
             <span>View All Tools</span>
             <ArrowRight className="w-3.5 h-3.5" />
@@ -215,7 +215,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onOpenSearch, onOpenAIAssist
               <div
                 key={tool.id}
                 onClick={() => navigate(tool.path)}
-                className="group relative p-4 rounded-2xl bg-white/90 dark:bg-slate-900/90 border border-slate-200/80 dark:border-slate-800/80 hover:border-brand-300 dark:hover:border-brand-500/40 shadow-sm hover:shadow-xl hover:shadow-brand-500/5 hover:-translate-y-0.5 cursor-pointer transition-all flex flex-col justify-between"
+                className="group relative p-4 rounded-2xl bg-white/90 dark:bg-slate-900/90 border border-slate-200/80 dark:border-slate-800/80 hover:border-emerald-300 dark:hover:border-emerald-500/50 shadow-sm hover:shadow-xl hover:shadow-emerald-500/10 hover:-translate-y-0.5 cursor-pointer transition-all flex flex-col justify-between"
               >
                 <div>
                   <div className="flex items-start justify-between gap-2 mb-2">
@@ -230,7 +230,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onOpenSearch, onOpenAIAssist
                       }}
                       className={`p-1 rounded-md transition-colors ${
                         fav
-                          ? 'text-brand-500'
+                          ? 'text-emerald-500'
                           : 'text-slate-300 dark:text-slate-600 hover:text-slate-500'
                       }`}
                       title={fav ? 'Remove from bookmarks' : 'Add to bookmarks'}
@@ -239,7 +239,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onOpenSearch, onOpenAIAssist
                     </button>
                   </div>
 
-                  <h3 className="font-semibold text-sm text-slate-900 dark:text-slate-100 group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors">
+                  <h3 className="font-semibold text-sm text-slate-900 dark:text-slate-100 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
                     {tool.name}
                   </h3>
                   <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 line-clamp-2 leading-relaxed">
@@ -249,7 +249,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onOpenSearch, onOpenAIAssist
 
                 <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-[11px] text-slate-400">
                   <span>In-Browser</span>
-                  <span className="font-semibold text-brand-600 dark:text-brand-400 group-hover:translate-x-0.5 transition-transform">
+                  <span className="font-semibold text-emerald-600 dark:text-emerald-400 group-hover:translate-x-0.5 transition-transform">
                     Use Tool →
                   </span>
                 </div>
@@ -268,7 +268,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onOpenSearch, onOpenAIAssist
             </h2>
             <Link
               to="/history"
-              className="text-xs font-semibold text-brand-600 dark:text-brand-400 hover:underline"
+              className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:underline"
             >
               View Full History
             </Link>
@@ -279,7 +279,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onOpenSearch, onOpenAIAssist
               <div
                 key={tool.id}
                 onClick={() => navigate(tool.path)}
-                className="p-3 rounded-xl bg-white/90 dark:bg-slate-900/90 border border-slate-200/80 dark:border-slate-800/80 hover:border-brand-500 dark:hover:border-brand-500 cursor-pointer shadow-sm hover:shadow-brand transition-all"
+                className="p-3 rounded-xl bg-white/90 dark:bg-slate-900/90 border border-slate-200/80 dark:border-slate-800/80 hover:border-emerald-500 dark:hover:border-emerald-500 cursor-pointer shadow-sm hover:shadow-emerald-500/20 transition-all"
               >
                 <p className="text-xs font-semibold text-slate-800 dark:text-slate-200 truncate">
                   {tool.name}

@@ -13,32 +13,32 @@
 
   body {
     @apply transition-colors duration-200 antialiased;
-    background-color: #f8fafc;
-    color: #0f172a;
+    background-color: #f8fbfb;
+    color: #0f2930;
   }
 
   html.dark body {
-    background-color: #090d16;
-    color: #f8fafc;
+    background-color: #061317;
+    color: #f0fdfa;
   }
 }
 
-/* Ambient subtle background glow for high-end SaaS feel */
+/* Ambient Fresh Mint & Ocean Teal glow for refreshing, energetic aesthetic */
 .bg-ambient-mesh {
   background-image: 
-    radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.08) 0px, transparent 50%),
-    radial-gradient(at 100% 0%, rgba(6, 182, 212, 0.08) 0px, transparent 50%),
-    radial-gradient(at 50% 100%, rgba(139, 92, 246, 0.05) 0px, transparent 50%);
+    radial-gradient(at 0% 0%, rgba(16, 185, 129, 0.08) 0px, transparent 50%),
+    radial-gradient(at 100% 0%, rgba(6, 182, 212, 0.09) 0px, transparent 50%),
+    radial-gradient(at 50% 100%, rgba(20, 184, 166, 0.06) 0px, transparent 50%);
 }
 
 html.dark .bg-ambient-mesh {
   background-image: 
-    radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.14) 0px, transparent 50%),
-    radial-gradient(at 100% 0%, rgba(6, 182, 212, 0.1) 0px, transparent 50%),
-    radial-gradient(at 50% 100%, rgba(139, 92, 246, 0.08) 0px, transparent 50%);
+    radial-gradient(at 0% 0%, rgba(16, 185, 129, 0.15) 0px, transparent 50%),
+    radial-gradient(at 100% 0%, rgba(6, 182, 212, 0.12) 0px, transparent 50%),
+    radial-gradient(at 50% 100%, rgba(20, 184, 166, 0.08) 0px, transparent 50%);
 }
 
-/* Premium Custom scrollbars */
+/* Refreshing custom scrollbars */
 ::-webkit-scrollbar {
   width: 7px;
   height: 7px;
@@ -52,7 +52,7 @@ html.dark .bg-ambient-mesh {
   @apply bg-slate-300/80 dark:bg-slate-700/80 rounded-full hover:bg-brand-500/80 dark:hover:bg-brand-400/80 transition-colors;
 }
 
-/* Card glass highlight */
+/* Glass highlight with fresh mint border */
 .glass-panel {
-  @apply bg-white/90 dark:bg-slate-900/80 backdrop-blur-md border border-slate-200/80 dark:border-slate-800/80 shadow-sm;
+  @apply bg-white/95 dark:bg-slate-900/85 backdrop-blur-md border border-teal-100/80 dark:border-teal-900/40 shadow-sm;
 }

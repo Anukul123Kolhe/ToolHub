@@ -13,6 +13,9 @@ if (fs.existsSync('dist/favicon.svg')) {
   fs.copyFileSync('dist/favicon.svg', 'dist/docs/favicon.svg');
 }
 fs.writeFileSync('dist/docs/.nojekyll', '');
+if (fs.existsSync('dist/docs/assets')) {
+  fs.rmSync('dist/docs/assets', { recursive: true, force: true });
+}
 fs.cpSync('dist/assets', 'dist/docs/assets', { recursive: true });
 
 // 3. Replicate to docs/ for main branch
@@ -23,6 +26,9 @@ if (fs.existsSync('dist/favicon.svg')) {
   fs.copyFileSync('dist/favicon.svg', 'docs/favicon.svg');
 }
 fs.writeFileSync('docs/.nojekyll', '');
+if (fs.existsSync('docs/assets')) {
+  fs.rmSync('docs/assets', { recursive: true, force: true });
+}
 fs.cpSync('dist/assets', 'docs/assets', { recursive: true });
 
 console.log('✓ Prepared GitHub Pages assets in root, /docs, and dist/docs');

@@ -65,8 +65,8 @@ export const SettingsPage: React.FC = () => {
             onClick={() => setTheme('light')}
             className={`p-3 rounded-xl border flex items-center gap-3 transition-all cursor-pointer ${
               theme === 'light'
-                ? 'border-brand-500 bg-brand-50/50 dark:bg-brand-950/30 text-brand-700 dark:text-brand-300 font-bold shadow-xs'
-                : 'border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-brand-300'
+                ? 'border-emerald-500 bg-emerald-50/60 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 font-bold shadow-xs'
+                : 'border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-emerald-300 dark:hover:border-emerald-600'
             }`}
           >
             <Sun className="w-4 h-4 text-amber-500" />
@@ -78,11 +78,11 @@ export const SettingsPage: React.FC = () => {
             onClick={() => setTheme('dark')}
             className={`p-3 rounded-xl border flex items-center gap-3 transition-all cursor-pointer ${
               theme === 'dark'
-                ? 'border-brand-500 bg-brand-50/50 dark:bg-brand-950/30 text-brand-700 dark:text-brand-300 font-bold shadow-xs'
-                : 'border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-brand-300'
+                ? 'border-emerald-500 bg-emerald-50/60 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 font-bold shadow-xs'
+                : 'border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-emerald-300 dark:hover:border-emerald-600'
             }`}
           >
-            <Moon className="w-4 h-4 text-indigo-400" />
+            <Moon className="w-4 h-4 text-teal-400" />
             <span className="text-xs">Dark Mode</span>
           </button>
         </div>

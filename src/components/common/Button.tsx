@@ -24,13 +24,13 @@ export const Button: React.FC<ButtonProps> = ({
 
   const variants = {
     primary:
-      'bg-gradient-to-r from-brand-600 via-indigo-600 to-brand-700 hover:from-brand-500 hover:via-indigo-500 hover:to-brand-600 text-white shadow-md shadow-brand-500/25 hover:shadow-brand focus:ring-brand-500',
+      'bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 hover:from-emerald-500 hover:via-teal-500 hover:to-cyan-500 text-white shadow-md shadow-emerald-500/25 hover:shadow-brand focus:ring-emerald-500',
     secondary:
-      'bg-slate-100 hover:bg-slate-200 text-slate-800 dark:bg-slate-800/90 dark:hover:bg-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700/80 focus:ring-brand-400',
+      'bg-slate-100 hover:bg-slate-200 text-slate-800 dark:bg-slate-800/90 dark:hover:bg-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700/80 focus:ring-emerald-400',
     outline:
-      'border border-slate-300/80 hover:border-brand-500/50 hover:bg-brand-50/50 text-slate-700 dark:border-slate-700 dark:hover:border-brand-400/50 dark:hover:bg-brand-950/30 dark:text-slate-200 focus:ring-brand-400',
+      'border border-slate-300/80 hover:border-emerald-500/50 hover:bg-emerald-50/50 text-slate-700 dark:border-slate-700 dark:hover:border-emerald-400/50 dark:hover:bg-emerald-950/30 dark:text-slate-200 focus:ring-emerald-400',
     ghost:
-      'text-slate-600 hover:bg-brand-50/50 hover:text-brand-600 dark:text-slate-400 dark:hover:bg-brand-950/30 dark:hover:text-brand-300 focus:ring-brand-400',
+      'text-slate-600 hover:bg-emerald-50/50 hover:text-emerald-700 dark:text-slate-400 dark:hover:bg-emerald-950/30 dark:hover:text-emerald-300 focus:ring-emerald-400',
     danger:
       'bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-500 hover:to-red-500 text-white shadow-md shadow-rose-500/20 focus:ring-rose-500',
   };

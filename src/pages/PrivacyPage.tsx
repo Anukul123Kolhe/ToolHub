@@ -48,7 +48,7 @@ export const PrivacyPage: React.FC = () => {
         </div>
 
         <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-2.5">
-          <div className="w-9 h-9 rounded-xl bg-indigo-100 dark:bg-indigo-950 flex items-center justify-center text-indigo-600">
+          <div className="w-9 h-9 rounded-xl bg-cyan-100 dark:bg-cyan-950 flex items-center justify-center text-cyan-600">
             <Lock className="w-5 h-5" />
           </div>
           <h3 className="font-semibold text-sm text-slate-900 dark:text-slate-100">
@@ -60,7 +60,7 @@ export const PrivacyPage: React.FC = () => {
         </div>
 
         <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-2.5">
-          <div className="w-9 h-9 rounded-xl bg-purple-100 dark:bg-purple-950 flex items-center justify-center text-purple-600">
+          <div className="w-9 h-9 rounded-xl bg-emerald-100 dark:bg-emerald-950 flex items-center justify-center text-emerald-600">
             <EyeOff className="w-5 h-5" />
           </div>
           <h3 className="font-semibold text-sm text-slate-900 dark:text-slate-100">

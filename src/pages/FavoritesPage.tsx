@@ -64,7 +64,7 @@ export const FavoritesPage: React.FC = () => {
               <div
                 key={tool.id}
                 onClick={() => navigate(tool.path)}
-                className="group p-4 rounded-2xl bg-white/90 dark:bg-slate-900/90 border border-slate-200/80 dark:border-slate-800/80 hover:border-brand-300 dark:hover:border-brand-500/40 shadow-sm hover:shadow-xl hover:shadow-brand-500/5 hover:-translate-y-0.5 cursor-pointer transition-all flex flex-col justify-between"
+                className="group p-4 rounded-2xl bg-white/90 dark:bg-slate-900/90 border border-slate-200/80 dark:border-slate-800/80 hover:border-emerald-300 dark:hover:border-emerald-500/40 shadow-sm hover:shadow-xl hover:shadow-emerald-500/10 hover:-translate-y-0.5 cursor-pointer transition-all flex flex-col justify-between"
               >
                 <div>
                   <div className="flex items-start justify-between gap-2 mb-2">
@@ -77,14 +77,14 @@ export const FavoritesPage: React.FC = () => {
                         e.stopPropagation();
                         toggleFavorite(tool.id);
                       }}
-                      className="p-1 rounded-md text-brand-500 hover:text-rose-500 transition-colors"
+                      className="p-1 rounded-md text-emerald-500 hover:text-rose-500 transition-colors"
                       title="Remove from bookmarks"
                     >
                       <Bookmark className="w-4 h-4 fill-current" />
                     </button>
                   </div>
 
-                  <h3 className="font-semibold text-sm text-slate-900 dark:text-slate-100 group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors">
+                  <h3 className="font-semibold text-sm text-slate-900 dark:text-slate-100 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
                     {tool.name}
                   </h3>
                   <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 line-clamp-2 leading-relaxed">
@@ -94,7 +94,7 @@ export const FavoritesPage: React.FC = () => {
 
                 <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-[11px] text-slate-400">
                   <span>In-Browser</span>
-                  <span className="font-semibold text-brand-600 dark:text-brand-400 group-hover:translate-x-0.5 transition-transform">
+                  <span className="font-semibold text-emerald-600 dark:text-emerald-400 group-hover:translate-x-0.5 transition-transform">
                     Open Tool →
                   </span>
                 </div>
