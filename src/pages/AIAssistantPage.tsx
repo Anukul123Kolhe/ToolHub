@@ -18,12 +18,16 @@ import {
   savePreferredModel,
   hasUserApiKey,
   AVAILABLE_GEMINI_MODELS,
+  getAllAvailableModels,
+  normalizeModelId,
   isFastIntentEnabled,
+  GeminiModelOption,
 } from '../services/ai/geminiClient';
 import { resolveNaturalLanguageIntent } from '../services/ai/aiService';
 import { ChatMessageItem, ChatMessage } from '../components/ai/ChatMessageItem';
 
 export const AIAssistantPage: React.FC = () => {
+  const [availableModels, setAvailableModels] = useState<GeminiModelOption[]>(() => getAllAvailableModels());
   const [selectedModel, setSelectedModel] = useState<string>(() => getPreferredModel());
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [userKeyActive, setUserKeyActive] = useState<boolean>(() => hasUserApiKey());
@@ -37,6 +41,7 @@ export const AIAssistantPage: React.FC = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    setAvailableModels(getAllAvailableModels());
     setSelectedModel(getPreferredModel());
     setUserKeyActive(hasUserApiKey());
   }, []);
@@ -52,8 +57,9 @@ export const AIAssistantPage: React.FC = () => {
   };
 
   const handleModelChange = (newModel: string) => {
-    setSelectedModel(newModel);
-    savePreferredModel(newModel);
+    const normalized = normalizeModelId(newModel);
+    setSelectedModel(normalized);
+    savePreferredModel(normalized);
   };
 
   const sendMessage = async (messageText: string, activeApiKey: string) => {
@@ -175,14 +181,19 @@ export const AIAssistantPage: React.FC = () => {
               <select
                 value={selectedModel}
                 onChange={(e) => handleModelChange(e.target.value)}
-                className="text-xs font-bold text-slate-700 dark:text-slate-200 bg-slate-100 hover:bg-slate-200/80 dark:bg-slate-800 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-700 rounded-lg pl-2.5 pr-7 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer appearance-none transition-colors"
+                className="text-xs font-bold text-slate-700 dark:text-slate-200 bg-slate-100 hover:bg-slate-200/80 dark:bg-slate-800 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-700 rounded-lg pl-2.5 pr-7 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer appearance-none transition-colors max-w-[200px] truncate"
                 title="Select Google Gemini Model"
               >
-                {AVAILABLE_GEMINI_MODELS.map((m) => (
+                {availableModels.map((m) => (
                   <option key={m.id} value={m.id}>
-                    {m.name}
+                    {m.name} ({m.tag})
                   </option>
                 ))}
+                {!availableModels.some((m) => m.id === selectedModel) && (
+                  <option value={selectedModel}>
+                    Custom: {selectedModel}
+                  </option>
+                )}
               </select>
               <ChevronDown className="w-3.5 h-3.5 absolute right-2 pointer-events-none text-slate-400" />
             </div>

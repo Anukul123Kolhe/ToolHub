@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   ShieldCheck,
   Check,
@@ -17,6 +17,7 @@ import {
   AlertCircle,
   CheckCircle2,
   RefreshCw,
+  Search,
 } from 'lucide-react';
 import { Card } from '../components/common/Card';
 import { Button } from '../components/common/Button';
@@ -26,6 +27,9 @@ import { useTheme } from '../context/ThemeContext';
 import { useStorage } from '../context/StorageContext';
 import {
   AVAILABLE_GEMINI_MODELS,
+  getAllAvailableModels,
+  fetchAvailableModelsFromKey,
+  normalizeModelId,
   getPreferredModel,
   savePreferredModel,
   getUserApiKey,
@@ -36,6 +40,7 @@ import {
   isFastIntentEnabled,
   setFastIntentEnabled,
   DEFAULT_GEMINI_MODEL,
+  GeminiModelOption,
 } from '../services/ai/geminiClient';
 
 export const SettingsPage: React.FC = () => {
@@ -48,9 +53,13 @@ export const SettingsPage: React.FC = () => {
   const [isCustomKeySaved, setIsCustomKeySaved] = useState<boolean>(false);
 
   // Model Selection State
+  const [modelsList, setModelsList] = useState<GeminiModelOption[]>(() => getAllAvailableModels());
   const [selectedModel, setSelectedModel] = useState<string>(DEFAULT_GEMINI_MODEL);
   const [customModelId, setCustomModelId] = useState<string>('');
   const [isCustomModelActive, setIsCustomModelActive] = useState<boolean>(false);
+  const [isSyncingModels, setIsSyncingModels] = useState<boolean>(false);
+  const [modelFilter, setModelFilter] = useState<'all' | 'argon' | 'flash' | 'pro'>('all');
+  const [modelSearch, setModelSearch] = useState<string>('');
 
   // Speed & Efficiency
   const [fastIntent, setFastIntent] = useState<boolean>(true);
@@ -67,10 +76,13 @@ export const SettingsPage: React.FC = () => {
     setApiKeyInput(savedKey);
     setIsCustomKeySaved(Boolean(savedKey));
 
+    const allModels = getAllAvailableModels();
+    setModelsList(allModels);
+
     const preferred = getPreferredModel();
     setSelectedModel(preferred);
 
-    const isKnown = AVAILABLE_GEMINI_MODELS.some((m) => m.id === preferred);
+    const isKnown = allModels.some((m) => m.id === preferred);
     if (!isKnown && preferred) {
       setCustomModelId(preferred);
       setIsCustomModelActive(true);
@@ -79,14 +91,36 @@ export const SettingsPage: React.FC = () => {
     setFastIntent(isFastIntentEnabled());
   }, []);
 
-  const handleSaveApiKey = () => {
+  const handleSyncModels = async (keyOverride?: string) => {
+    const key = (keyOverride !== undefined ? keyOverride : apiKeyInput).trim();
+    setIsSyncingModels(true);
+    try {
+      const fetched = await fetchAvailableModelsFromKey(key);
+      const updated = getAllAvailableModels();
+      setModelsList(updated);
+      setStatusMessage(`Synced! Found ${fetched.length} Gemini models enabled on your API key.`);
+    } catch (err: any) {
+      setStatusMessage(`Model sync notice: ${err?.message || 'Failed to fetch models'}`);
+    } finally {
+      setIsSyncingModels(false);
+      setTimeout(() => setStatusMessage(null), 3500);
+    }
+  };
+
+  const handleSaveApiKey = async () => {
     saveUserApiKey(apiKeyInput);
     const hasKey = Boolean(apiKeyInput.trim());
     setIsCustomKeySaved(hasKey);
     setTestResult(null);
 
-    setStatusMessage(hasKey ? 'Google Gemini API key saved successfully!' : 'API key removed. Using default engine.');
-    setTimeout(() => setStatusMessage(null), 3000);
+    if (hasKey) {
+      setStatusMessage('Google Gemini API key saved! Syncing available models...');
+      await handleSyncModels(apiKeyInput);
+    } else {
+      setModelsList(getAllAvailableModels());
+      setStatusMessage('API key removed. Using default engine.');
+      setTimeout(() => setStatusMessage(null), 3000);
+    }
   };
 
   const handleRemoveApiKey = () => {
@@ -94,6 +128,7 @@ export const SettingsPage: React.FC = () => {
     setApiKeyInput('');
     setIsCustomKeySaved(false);
     setTestResult(null);
+    setModelsList(getAllAvailableModels());
 
     setStatusMessage('Custom API key removed. Reverted to built-in ToolHub AI engine.');
     setTimeout(() => setStatusMessage(null), 3000);
@@ -103,28 +138,51 @@ export const SettingsPage: React.FC = () => {
     setIsTesting(true);
     setTestResult(null);
 
-    const activeModel = isCustomModelActive && customModelId.trim() ? customModelId.trim() : selectedModel;
+    const activeModel =
+      isCustomModelActive && customModelId.trim()
+        ? normalizeModelId(customModelId.trim())
+        : selectedModel;
     const res = await testGeminiConnection(apiKeyInput, activeModel);
+
+    if (res.success) {
+      const updated = getAllAvailableModels();
+      setModelsList(updated);
+    }
 
     setIsTesting(false);
     setTestResult(res);
   };
 
   const handleSelectModel = (modelId: string) => {
-    setSelectedModel(modelId);
+    const normalized = normalizeModelId(modelId);
+    setSelectedModel(normalized);
     setIsCustomModelActive(false);
-    savePreferredModel(modelId);
+    savePreferredModel(normalized);
 
-    setStatusMessage(`Active AI model set to ${modelId}`);
+    setStatusMessage(`Active AI model set to ${normalized}`);
     setTimeout(() => setStatusMessage(null), 2500);
   };
 
   const handleSaveCustomModel = () => {
     if (!customModelId.trim()) return;
-    const cleanId = customModelId.trim();
+    const cleanId = normalizeModelId(customModelId.trim());
     setSelectedModel(cleanId);
     setIsCustomModelActive(true);
     savePreferredModel(cleanId);
+
+    // If not in current list, prepend as custom model option
+    if (!modelsList.some((m) => m.id === cleanId)) {
+      setModelsList((prev) => [
+        {
+          id: cleanId,
+          name: cleanId.replace(/^gemini-/, 'Gemini ').toUpperCase(),
+          tag: 'Custom',
+          description: `Custom model ID: ${cleanId}`,
+          isLatest: true,
+        },
+        ...prev,
+      ]);
+    }
 
     setStatusMessage(`Custom model "${cleanId}" activated!`);
     setTimeout(() => setStatusMessage(null), 2500);
@@ -137,6 +195,32 @@ export const SettingsPage: React.FC = () => {
     setStatusMessage(enabled ? 'Zero-latency quick intent routing enabled.' : 'Quick intent routing disabled.');
     setTimeout(() => setStatusMessage(null), 2000);
   };
+
+  // Filtered models based on tab and search
+  const filteredModels = useMemo(() => {
+    let list = modelsList;
+
+    if (modelFilter === 'argon') {
+      list = list.filter((m) => m.id.includes('argon') || m.tag.toLowerCase().includes('argon'));
+    } else if (modelFilter === 'flash') {
+      list = list.filter((m) => m.id.includes('flash') || m.id.includes('3.8'));
+    } else if (modelFilter === 'pro') {
+      list = list.filter((m) => m.id.includes('pro'));
+    }
+
+    if (modelSearch.trim()) {
+      const q = modelSearch.toLowerCase().trim();
+      list = list.filter(
+        (m) =>
+          m.id.toLowerCase().includes(q) ||
+          m.name.toLowerCase().includes(q) ||
+          m.tag.toLowerCase().includes(q) ||
+          m.description.toLowerCase().includes(q)
+      );
+    }
+
+    return list;
+  }, [modelsList, modelFilter, modelSearch]);
 
   const handleClearHistory = () => {
     clearHistory();
@@ -243,6 +327,17 @@ export const SettingsPage: React.FC = () => {
                 Test Connection
               </Button>
 
+              <Button
+                onClick={() => handleSyncModels(apiKeyInput)}
+                variant="outline"
+                size="sm"
+                isLoading={isSyncingModels}
+                icon={<RefreshCw className={`w-4 h-4 text-emerald-600 ${isSyncingModels ? 'animate-spin' : ''}`} />}
+                title="Query Google API to discover and load all models active on this API key"
+              >
+                Sync Models from Key
+              </Button>
+
               {isCustomKeySaved && (
                 <Button
                   onClick={handleRemoveApiKey}
@@ -291,85 +386,172 @@ export const SettingsPage: React.FC = () => {
         </div>
       </Card>
 
-      {/* SECTION 2: GOOGLE GEMINI MODEL SELECTION */}
+      {/* SECTION 2: GOOGLE GEMINI MODEL SELECTION & DISCOVERY */}
       <Card className="p-6 space-y-5">
-        <div className="pb-3 border-b border-slate-200 dark:border-slate-800">
-          <div className="flex items-center gap-2">
-            <Sparkles className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-            <h2 className="text-base font-black text-[#0F172A] dark:text-white">
-              Google Gemini Models
-            </h2>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-200 dark:border-slate-800">
+          <div>
+            <div className="flex items-center gap-2">
+              <Sparkles className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+              <h2 className="text-base font-black text-[#0F172A] dark:text-white">
+                Google Gemini Models
+              </h2>
+            </div>
+            <p className="text-xs text-slate-600 dark:text-slate-400 mt-1 font-normal">
+              Select or discover any Google model enabled on your API key, including Argon, 3.8 Flash, and custom previews.
+            </p>
           </div>
-          <p className="text-xs text-slate-600 dark:text-slate-400 mt-1 font-normal">
-            Choose which Google Gemini model powers your AI Assistant. You can switch between ultra-fast or deep-reasoning models.
-          </p>
+
+          <div className="flex items-center gap-2 shrink-0">
+            <Badge variant="info" size="sm">
+              {modelsList.length} Models Available
+            </Badge>
+
+            <button
+              type="button"
+              onClick={() => handleSyncModels()}
+              disabled={isSyncingModels}
+              className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition-colors"
+              title="Refresh models from Google API"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${isSyncingModels ? 'animate-spin text-blue-600' : ''}`} />
+            </button>
+          </div>
+        </div>
+
+        {/* Filter Pills and Search */}
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0">
+            <button
+              type="button"
+              onClick={() => setModelFilter('all')}
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                modelFilter === 'all'
+                  ? 'bg-blue-600 text-white shadow-xs'
+                  : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
+              }`}
+            >
+              All ({modelsList.length})
+            </button>
+            <button
+              type="button"
+              onClick={() => setModelFilter('argon')}
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                modelFilter === 'argon'
+                  ? 'bg-blue-600 text-white shadow-xs'
+                  : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
+              }`}
+            >
+              Argon
+            </button>
+            <button
+              type="button"
+              onClick={() => setModelFilter('flash')}
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                modelFilter === 'flash'
+                  ? 'bg-blue-600 text-white shadow-xs'
+                  : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
+              }`}
+            >
+              3.8 & Flash
+            </button>
+            <button
+              type="button"
+              onClick={() => setModelFilter('pro')}
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                modelFilter === 'pro'
+                  ? 'bg-blue-600 text-white shadow-xs'
+                  : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
+              }`}
+            >
+              Pro Reasoning
+            </button>
+          </div>
+
+          <div className="relative min-w-[200px]">
+            <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+            <input
+              type="text"
+              value={modelSearch}
+              onChange={(e) => setModelSearch(e.target.value)}
+              placeholder="Filter models..."
+              className="w-full text-xs pl-8 pr-3 py-1.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-[#0F172A] dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
         </div>
 
         {/* Model Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          {AVAILABLE_GEMINI_MODELS.map((model) => {
-            const isSelected = selectedModel === model.id && !isCustomModelActive;
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-[460px] overflow-y-auto pr-1">
+          {filteredModels.length === 0 ? (
+            <div className="col-span-2 p-6 text-center text-xs text-slate-500 dark:text-slate-400">
+              No models match your search query. Try typing another term or sync models from your API key.
+            </div>
+          ) : (
+            filteredModels.map((model) => {
+              const isSelected = selectedModel === model.id && !isCustomModelActive;
 
-            return (
-              <div
-                key={model.id}
-                onClick={() => handleSelectModel(model.id)}
-                className={`p-4 rounded-xl border cursor-pointer transition-all flex flex-col justify-between ${
-                  isSelected
-                    ? 'border-blue-600 bg-blue-50/70 dark:bg-blue-950/40 shadow-sm ring-2 ring-blue-500/20'
-                    : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 hover:border-slate-300 dark:hover:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800/40'
-                }`}
-              >
-                <div>
-                  <div className="flex items-center justify-between gap-2 mb-1.5">
-                    <span className="font-bold text-sm text-[#0F172A] dark:text-white">
-                      {model.name}
-                    </span>
-                    <span
-                      className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                        model.tag.includes('Fast')
-                          ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/70 dark:text-emerald-300'
-                          : 'bg-blue-100 text-blue-800 dark:bg-blue-950/70 dark:text-blue-300'
-                      }`}
-                    >
-                      {model.tag}
-                    </span>
+              return (
+                <div
+                  key={model.id}
+                  onClick={() => handleSelectModel(model.id)}
+                  className={`p-4 rounded-xl border cursor-pointer transition-all flex flex-col justify-between ${
+                    isSelected
+                      ? 'border-blue-600 bg-blue-50/70 dark:bg-blue-950/40 shadow-sm ring-2 ring-blue-500/20'
+                      : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 hover:border-slate-300 dark:hover:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800/40'
+                  }`}
+                >
+                  <div>
+                    <div className="flex items-center justify-between gap-2 mb-1.5">
+                      <span className="font-bold text-sm text-[#0F172A] dark:text-white">
+                        {model.name}
+                      </span>
+                      <span
+                        className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                          model.id.includes('argon')
+                            ? 'bg-purple-100 text-purple-800 dark:bg-purple-950/70 dark:text-purple-300'
+                            : model.id.includes('3.8') || model.tag.includes('Fast')
+                            ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/70 dark:text-emerald-300'
+                            : 'bg-blue-100 text-blue-800 dark:bg-blue-950/70 dark:text-blue-300'
+                        }`}
+                      >
+                        {model.tag}
+                      </span>
+                    </div>
+
+                    <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed font-normal">
+                      {model.description}
+                    </p>
                   </div>
 
-                  <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed font-normal">
-                    {model.description}
-                  </p>
+                  <div className="mt-3 pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-[11px]">
+                    <code className="text-slate-400 font-mono">{model.id}</code>
+                    {isSelected ? (
+                      <span className="font-bold text-blue-600 dark:text-blue-400 flex items-center gap-1">
+                        <Check className="w-3.5 h-3.5" />
+                        Active Model
+                      </span>
+                    ) : (
+                      <span className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+                        Select
+                      </span>
+                    )}
+                  </div>
                 </div>
-
-                <div className="mt-3 pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-[11px]">
-                  <code className="text-slate-400 font-mono">{model.id}</code>
-                  {isSelected ? (
-                    <span className="font-bold text-blue-600 dark:text-blue-400 flex items-center gap-1">
-                      <Check className="w-3.5 h-3.5" />
-                      Active Model
-                    </span>
-                  ) : (
-                    <span className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
-                      Select
-                    </span>
-                  )}
-                </div>
-              </div>
-            );
-          })}
+              );
+            })
+          )}
         </div>
 
         {/* Custom Model ID Option */}
         <div className="pt-3 border-t border-slate-200 dark:border-slate-800 space-y-2">
           <label className="block text-xs font-bold text-[#0F172A] dark:text-slate-200">
-            Use Any Custom Google Model (e.g., Experimental or Next-Gen Previews)
+            Use Any Custom Google Model (e.g. "argon", "3.8", or tuned model ID)
           </label>
           <div className="flex items-center gap-2 max-w-md">
             <input
               type="text"
               value={customModelId}
               onChange={(e) => setCustomModelId(e.target.value)}
-              placeholder="e.g. gemini-3.0-flash, gemini-exp..."
+              placeholder="e.g. argon, 3.8, gemini-3.0-flash, custom..."
               className="w-full text-xs font-mono px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-[#0F172A] dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
             <Button
@@ -381,6 +563,11 @@ export const SettingsPage: React.FC = () => {
               Set Model
             </Button>
           </div>
+          {customModelId.trim() && normalizeModelId(customModelId) !== customModelId.trim() && (
+            <p className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold">
+              Alias recognized → Resolves to <code className="font-mono">{normalizeModelId(customModelId)}</code>
+            </p>
+          )}
           {isCustomModelActive && (
             <p className="text-xs font-bold text-blue-600 dark:text-blue-400">
               Active custom model: <code className="font-mono">{selectedModel}</code>

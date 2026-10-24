@@ -10,10 +10,38 @@ export interface GeminiModelOption {
 
 export const AVAILABLE_GEMINI_MODELS: GeminiModelOption[] = [
   {
+    id: 'gemini-4-argon',
+    name: 'Gemini 4 Argon',
+    tag: 'Argon • Next-Gen Flagship',
+    description: 'Next-generation Google Argon architecture model with frontier intelligence and deep synthesis.',
+    isLatest: true,
+  },
+  {
+    id: 'gemini-3.8-flash',
+    name: 'Gemini 3.8 Flash',
+    tag: '3.8 • Ultra Fast',
+    description: 'Ultra-high-speed Google 3.8 generation model with sub-second execution.',
+    isLatest: true,
+  },
+  {
+    id: 'gemini-3.7-flash',
+    name: 'Gemini 3.7 Flash',
+    tag: 'Gemini 3.7',
+    description: 'Google 3.7 generation high-efficiency reasoning and generation.',
+    isLatest: true,
+  },
+  {
+    id: 'gemini-3.1-pro-preview',
+    name: 'Gemini 3.1 Pro Preview',
+    tag: 'Gemini 3.1 Pro',
+    description: 'Advanced reasoning, deep logic, and complex document comprehension.',
+    isLatest: true,
+  },
+  {
     id: 'gemini-2.5-flash',
     name: 'Gemini 2.5 Flash',
-    tag: 'Recommended • Ultra Fast',
-    description: 'Latest Google flagship model with sub-second response latency and high intelligence.',
+    tag: 'Recommended • Fast',
+    description: 'Flagship stable model with balanced intelligence and sub-second response latency.',
     isLatest: true,
   },
   {
@@ -27,7 +55,7 @@ export const AVAILABLE_GEMINI_MODELS: GeminiModelOption[] = [
     id: 'gemini-2.0-flash',
     name: 'Gemini 2.0 Flash',
     tag: 'Fast Multimodal',
-    description: 'High-throughput, responsive model for document, text, and photo workflows.',
+    description: 'High-throughput, responsive model for general utility workflows.',
   },
   {
     id: 'gemini-2.0-flash-lite',
@@ -38,14 +66,14 @@ export const AVAILABLE_GEMINI_MODELS: GeminiModelOption[] = [
   {
     id: 'gemini-1.5-flash',
     name: 'Gemini 1.5 Flash',
-    tag: 'High Speed',
-    description: 'Reliable, battle-tested model with 1M token context window.',
+    tag: '1M Context',
+    description: 'High-capacity context window with proven stability.',
   },
   {
     id: 'gemini-1.5-pro',
     name: 'Gemini 1.5 Pro',
     tag: 'High Capacity',
-    description: 'Deep document comprehension and comprehensive answers.',
+    description: 'Complex multimodal document understanding.',
   },
 ];
 
@@ -63,6 +91,22 @@ export const BACKEND_GEMINI_API_KEY = getRuntimeKey();
 const USER_API_KEY_STORAGE_KEY = 'toolhub_user_gemini_api_key';
 const USER_MODEL_STORAGE_KEY = 'toolhub_gemini_model';
 const USER_FAST_INTENT_KEY = 'toolhub_ai_fast_intent';
+const USER_DISCOVERED_MODELS_KEY = 'toolhub_discovered_gemini_models';
+
+export function normalizeModelId(inputModel: string): string {
+  let m = (inputModel || '').trim();
+  const lower = m.toLowerCase();
+  if (lower === 'argon' || lower === 'gemini-argon' || lower === 'gemini-4-argon' || lower === '4-argon') return 'gemini-4-argon';
+  if (lower === '3.8' || lower === 'gemini-3.8' || lower === 'gemini-3.8-flash' || lower === '3.8-flash') return 'gemini-3.8-flash';
+  if (lower === '3.7' || lower === 'gemini-3.7' || lower === 'gemini-3.7-flash') return 'gemini-3.7-flash';
+  if (lower === '3.5' || lower === 'gemini-3.5' || lower === 'gemini-3.5-flash') return 'gemini-3.5-flash';
+  if (lower === '3.1' || lower === 'gemini-3.1' || lower === '3.1-pro') return 'gemini-3.1-pro-preview';
+  if (lower === '2.5' || lower === 'gemini-2.5' || lower === '2.5-flash') return 'gemini-2.5-flash';
+  if (lower === 'pro' || lower === 'gemini-pro') return 'gemini-2.5-pro';
+  if (lower === 'flash' || lower === 'gemini-flash') return 'gemini-2.5-flash';
+  if (m.startsWith('models/')) m = m.replace(/^models\//, '');
+  return m;
+}
 
 export function getUserApiKey(): string {
   if (typeof localStorage !== 'undefined') {
@@ -84,6 +128,7 @@ export function saveUserApiKey(key: string): void {
 export function removeUserApiKey(): void {
   if (typeof localStorage !== 'undefined') {
     localStorage.removeItem(USER_API_KEY_STORAGE_KEY);
+    localStorage.removeItem(USER_DISCOVERED_MODELS_KEY);
   }
 }
 
@@ -111,14 +156,14 @@ export function getPreferredModel(): string {
 
 export function savePreferredModel(model: string): void {
   if (typeof localStorage !== 'undefined') {
-    localStorage.setItem(USER_MODEL_STORAGE_KEY, model.trim());
+    localStorage.setItem(USER_MODEL_STORAGE_KEY, normalizeModelId(model));
   }
 }
 
 export function isFastIntentEnabled(): boolean {
   if (typeof localStorage !== 'undefined') {
     const val = localStorage.getItem(USER_FAST_INTENT_KEY);
-    return val !== 'false'; // Enabled by default
+    return val !== 'false';
   }
   return true;
 }
@@ -127,6 +172,85 @@ export function setFastIntentEnabled(enabled: boolean): void {
   if (typeof localStorage !== 'undefined') {
     localStorage.setItem(USER_FAST_INTENT_KEY, enabled ? 'true' : 'false');
   }
+}
+
+/**
+ * Dynamically queries Google Generative Language API with the user's API key
+ * to fetch ALL models enabled on their account (e.g. argon, 3.8, experimental, custom).
+ */
+export async function fetchAvailableModelsFromKey(apiKey: string): Promise<GeminiModelOption[]> {
+  const cleanKey = apiKey.trim() || getEffectiveApiKey();
+  if (!cleanKey) return AVAILABLE_GEMINI_MODELS;
+
+  try {
+    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${cleanKey}`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+    const data = await res.json();
+    const rawModels: any[] = data.models || [];
+
+    const contentModels = rawModels
+      .filter((m) => {
+        const methods = m.supportedGenerationMethods || [];
+        return methods.includes('generateContent');
+      })
+      .map((m) => {
+        const id = m.name.replace(/^models\//, '');
+        let tag = 'Available';
+        if (id.includes('argon')) tag = 'Argon • Flagship';
+        else if (id.includes('3.8')) tag = '3.8 • Ultra Fast';
+        else if (id.includes('3.7')) tag = '3.7 Flash';
+        else if (id.includes('3.5')) tag = '3.5 Flash';
+        else if (id.includes('3.1')) tag = '3.1 Preview';
+        else if (id.includes('2.5-pro')) tag = 'Deep Reasoning';
+        else if (id.includes('2.5-flash')) tag = 'Recommended';
+        else if (id.includes('flash-lite')) tag = 'Ultra Lightweight';
+        else if (id.includes('flash')) tag = 'Fast';
+        else if (id.includes('pro')) tag = 'Pro Reasoning';
+
+        return {
+          id,
+          name: m.displayName || id,
+          tag,
+          description: m.description || `Google ${m.displayName || id} model.`,
+          isLatest: id.includes('argon') || id.includes('3.8') || id.includes('2.5'),
+        };
+      });
+
+    if (contentModels.length > 0) {
+      if (typeof localStorage !== 'undefined') {
+        localStorage.setItem(USER_DISCOVERED_MODELS_KEY, JSON.stringify(contentModels));
+      }
+      return contentModels;
+    }
+  } catch (err) {
+    console.warn('Failed to fetch dynamic models from Google API:', err);
+  }
+
+  return AVAILABLE_GEMINI_MODELS;
+}
+
+export function getAllAvailableModels(): GeminiModelOption[] {
+  if (typeof localStorage !== 'undefined') {
+    const cached = localStorage.getItem(USER_DISCOVERED_MODELS_KEY);
+    if (cached) {
+      try {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          const seen = new Set(parsed.map((p) => p.id));
+          const merged = [...parsed];
+          for (const m of AVAILABLE_GEMINI_MODELS) {
+            if (!seen.has(m.id)) {
+              merged.push(m);
+            }
+          }
+          return merged;
+        }
+      } catch (e) {
+        // fallback
+      }
+    }
+  }
+  return AVAILABLE_GEMINI_MODELS;
 }
 
 // Compact, high-performance system instructions to minimize token overhead and accelerate response latency
@@ -161,9 +285,10 @@ export async function executeGeminiRequest(
   apiKey: string,
   model: string,
   userMessage: string,
-  conversationHistory: { role: 'user' | 'model'; text: string }[] = []
+  conversationHistory: { role: 'user' | 'model'; text: string }[] = [],
+  includeThinking: boolean = true
 ): Promise<string> {
-  const cleanModel = model.trim() || DEFAULT_GEMINI_MODEL;
+  const cleanModel = normalizeModelId(model) || DEFAULT_GEMINI_MODEL;
   const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${cleanModel}:generateContent?key=${apiKey.trim()}`;
 
   const contents = [
@@ -177,14 +302,18 @@ export async function executeGeminiRequest(
     },
   ];
 
-  // Generation config optimized for rapid response
   const generationConfig: Record<string, any> = {
     temperature: 0.2,
     maxOutputTokens: 1000,
   };
 
-  // Only pass thinkingBudget on models that support it (2.5+ or 3+)
-  if (cleanModel.includes('2.5') || cleanModel.includes('3.')) {
+  // Only pass thinkingBudget if model is 2.5 flash or thinking model AND includeThinking is true
+  if (
+    includeThinking &&
+    (cleanModel.includes('2.5') || cleanModel.includes('thinking')) &&
+    !cleanModel.includes('argon') &&
+    !cleanModel.includes('3.8')
+  ) {
     generationConfig.thinkingConfig = { thinkingBudget: 0 };
   }
 
@@ -197,8 +326,7 @@ export async function executeGeminiRequest(
   };
 
   const controller = new AbortController();
-  // 10s timeout ensures quick response without hanging indefinitely
-  const timeoutId = setTimeout(() => controller.abort(), 10000);
+  const timeoutId = setTimeout(() => controller.abort(), 12000);
 
   try {
     const response = await fetch(endpoint, {
@@ -215,6 +343,18 @@ export async function executeGeminiRequest(
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
       const errorMsg = errorData?.error?.message || `HTTP ${response.status}: ${response.statusText}`;
+
+      // If failed due to thinking_config unsupported or schema rejection, retry once without thinkingConfig
+      if (
+        includeThinking &&
+        (errorMsg.includes('thinking') ||
+          errorMsg.includes('Unknown') ||
+          errorMsg.includes('INVALID_ARGUMENT') ||
+          response.status === 400)
+      ) {
+        return await executeGeminiRequest(apiKey, model, userMessage, conversationHistory, false);
+      }
+
       throw new Error(errorMsg);
     }
 
@@ -239,14 +379,14 @@ export async function callGeminiApi(
   model: string = DEFAULT_GEMINI_MODEL
 ): Promise<string> {
   const effectiveKey = apiKey.trim() || getEffectiveApiKey();
-  const initialModel = model.trim() || getPreferredModel();
+  const initialModel = normalizeModelId(model.trim() || getPreferredModel());
 
   try {
     return await executeGeminiRequest(effectiveKey, initialModel, userMessage, conversationHistory);
   } catch (err: any) {
     console.warn(`Request with ${initialModel} failed:`, err?.message);
 
-    // If a custom key is provided and fails, don't silently switch to another model without trying
+    // If using user's custom key and they chose a specific model, try the fallback chain
     for (const fallback of FALLBACK_MODEL_CHAIN) {
       if (fallback === initialModel) continue;
       try {
@@ -264,9 +404,9 @@ export async function callGeminiApi(
 export async function testGeminiConnection(
   apiKey: string = getEffectiveApiKey(),
   model: string = DEFAULT_GEMINI_MODEL
-): Promise<{ success: boolean; message: string }> {
+): Promise<{ success: boolean; message: string; modelsCount?: number }> {
   const keyToTest = apiKey.trim() || getEffectiveApiKey();
-  const modelToTest = model.trim() || getPreferredModel();
+  const modelToTest = normalizeModelId(model.trim() || getPreferredModel());
 
   if (!keyToTest) {
     return { success: false, message: 'No API key provided.' };
@@ -278,10 +418,20 @@ export async function testGeminiConnection(
       modelToTest,
       'Test connection. Reply with "OK".'
     );
+
+    let count = 0;
+    try {
+      const discovered = await fetchAvailableModelsFromKey(keyToTest);
+      count = discovered.length;
+    } catch (e) {
+      // Ignored
+    }
+
     if (testResponse) {
       return {
         success: true,
-        message: `Connected successfully to Google Gemini (${modelToTest})!`,
+        message: `Connected successfully to Google Gemini (${modelToTest})!${count > 0 ? ` Found ${count} available models on your API key.` : ''}`,
+        modelsCount: count,
       };
     }
     return { success: false, message: 'Empty response received from Google API.' };
