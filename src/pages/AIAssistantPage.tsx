@@ -5,6 +5,9 @@ import {
   ArrowUp,
   RotateCcw,
   Settings,
+  Zap,
+  Key,
+  ChevronDown,
 } from 'lucide-react';
 import { Card } from '../components/common/Card';
 import { Breadcrumbs } from '../components/layout/Breadcrumbs';
@@ -12,6 +15,10 @@ import {
   callGeminiApi,
   getEffectiveApiKey,
   getPreferredModel,
+  savePreferredModel,
+  hasUserApiKey,
+  AVAILABLE_GEMINI_MODELS,
+  isFastIntentEnabled,
 } from '../services/ai/geminiClient';
 import { resolveNaturalLanguageIntent } from '../services/ai/aiService';
 import { ChatMessageItem, ChatMessage } from '../components/ai/ChatMessageItem';
@@ -19,6 +26,7 @@ import { ChatMessageItem, ChatMessage } from '../components/ai/ChatMessageItem';
 export const AIAssistantPage: React.FC = () => {
   const [selectedModel, setSelectedModel] = useState<string>(() => getPreferredModel());
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [userKeyActive, setUserKeyActive] = useState<boolean>(() => hasUserApiKey());
 
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputText, setInputText] = useState<string>('');
@@ -30,6 +38,7 @@ export const AIAssistantPage: React.FC = () => {
 
   useEffect(() => {
     setSelectedModel(getPreferredModel());
+    setUserKeyActive(hasUserApiKey());
   }, []);
 
   useEffect(() => {
@@ -42,10 +51,42 @@ export const AIAssistantPage: React.FC = () => {
     setTimeout(() => setCopiedId(null), 2000);
   };
 
+  const handleModelChange = (newModel: string) => {
+    setSelectedModel(newModel);
+    savePreferredModel(newModel);
+  };
+
   const sendMessage = async (messageText: string, activeApiKey: string) => {
     setIsLoading(true);
 
     try {
+      // 1. Zero-latency intent optimization if enabled for direct tool listing
+      const lower = messageText.toLowerCase().trim();
+      const isDirectListQuery =
+        lower.startsWith('give me list of') ||
+        lower.startsWith('list of') ||
+        lower.startsWith('show me all') ||
+        lower.includes('list all image') ||
+        lower.includes('list all pdf');
+
+      if (isFastIntentEnabled() && isDirectListQuery) {
+        const directMatch = resolveNaturalLanguageIntent(messageText);
+        if (directMatch && directMatch.message && !directMatch.message.includes("couldn't fully identify")) {
+          setMessages((prev) => [
+            ...prev,
+            {
+              id: `assistant-${Date.now()}`,
+              sender: 'assistant',
+              text: directMatch.message,
+              timestamp: Date.now(),
+            },
+          ]);
+          setIsLoading(false);
+          return;
+        }
+      }
+
+      // 2. High-speed Google Gemini API inference with the selected model
       const history = messages
         .slice(-6)
         .map((m) => ({
@@ -116,16 +157,52 @@ export const AIAssistantPage: React.FC = () => {
       <Breadcrumbs items={[{ label: 'AI Assistant' }]} />
 
       <Card className="flex flex-col h-[740px] max-h-[85vh] overflow-hidden border border-slate-200 dark:border-slate-800 shadow-xl rounded-2xl bg-white dark:bg-slate-900">
-        {/* Header (No model name in top left) */}
-        <div className="flex items-center justify-between px-5 py-3 border-b border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900 select-none">
-          {/* Top Left: Clean Title & Icon (model name removed) */}
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-800 flex items-center justify-center text-blue-600 shadow-2xs">
-              <Sparkles className="w-4 h-4" />
+        {/* Header with Model Selector & API Key Status */}
+        <div className="flex items-center justify-between px-4 sm:px-5 py-3 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 select-none">
+          {/* Top Left: Title, Active Google Model Dropdown & Key Badge */}
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
+              <div className="w-7 h-7 rounded-lg bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-800 flex items-center justify-center text-blue-600 shadow-2xs">
+                <Sparkles className="w-4 h-4" />
+              </div>
+              <span className="font-extrabold text-sm text-[#0F172A] dark:text-white tracking-tight hidden xs:inline">
+                AI Assistant
+              </span>
             </div>
-            <span className="font-semibold text-sm text-slate-900 dark:text-slate-100 tracking-tight">
-              AI Assistant
-            </span>
+
+            {/* Google Gemini Model Selector */}
+            <div className="relative flex items-center">
+              <select
+                value={selectedModel}
+                onChange={(e) => handleModelChange(e.target.value)}
+                className="text-xs font-bold text-slate-700 dark:text-slate-200 bg-slate-100 hover:bg-slate-200/80 dark:bg-slate-800 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-700 rounded-lg pl-2.5 pr-7 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer appearance-none transition-colors"
+                title="Select Google Gemini Model"
+              >
+                {AVAILABLE_GEMINI_MODELS.map((m) => (
+                  <option key={m.id} value={m.id}>
+                    {m.name}
+                  </option>
+                ))}
+              </select>
+              <ChevronDown className="w-3.5 h-3.5 absolute right-2 pointer-events-none text-slate-400" />
+            </div>
+
+            {/* API Key Status Indicator */}
+            {userKeyActive ? (
+              <span className="hidden sm:inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-950/70 dark:text-emerald-300 border border-emerald-300">
+                <Key className="w-2.5 h-2.5" />
+                Custom Key
+              </span>
+            ) : (
+              <button
+                type="button"
+                onClick={() => navigate('/settings')}
+                className="hidden md:inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300 border border-blue-200 hover:bg-blue-100 transition-colors"
+                title="Configure your own Google API Key in Settings"
+              >
+                + Add API Key
+              </button>
+            )}
           </div>
 
           {/* Right Controls */}
@@ -143,7 +220,7 @@ export const AIAssistantPage: React.FC = () => {
               type="button"
               onClick={() => navigate('/settings')}
               className="p-1.5 rounded-lg text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-              title="Settings"
+              title="Settings & API Key"
             >
               <Settings className="w-4 h-4" />
             </button>
@@ -160,10 +237,10 @@ export const AIAssistantPage: React.FC = () => {
               </div>
 
               <div className="space-y-1">
-                <h2 className="text-xl sm:text-2xl font-semibold text-slate-900 dark:text-slate-100">
+                <h2 className="text-xl sm:text-2xl font-black text-[#0F172A] dark:text-white">
                   What can I help with?
                 </h2>
-                <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
+                <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 font-medium">
                   Search and run utilities, process files, format code, or calculate formulas.
                 </p>
               </div>
@@ -174,10 +251,10 @@ export const AIAssistantPage: React.FC = () => {
                     key={idx}
                     type="button"
                     onClick={() => handleSend(p.title)}
-                    className="p-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-white/60 dark:bg-slate-800/40 hover:bg-blue-50/70 dark:hover:bg-blue-950/50 hover:border-blue-400 dark:hover:border-blue-700 text-left transition-all"
+                    className="p-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-white/70 dark:bg-slate-800/40 hover:bg-blue-50/70 dark:hover:bg-blue-950/50 hover:border-blue-400 dark:hover:border-blue-700 text-left transition-all"
                   >
-                    <p className="text-xs font-semibold text-slate-800 dark:text-slate-200">{p.title}</p>
-                    <p className="text-[11px] text-slate-400 mt-0.5">{p.desc}</p>
+                    <p className="text-xs font-bold text-[#0F172A] dark:text-slate-200">{p.title}</p>
+                    <p className="text-[11px] text-slate-500 mt-0.5 font-normal">{p.desc}</p>
                   </button>
                 ))}
               </div>
@@ -200,12 +277,12 @@ export const AIAssistantPage: React.FC = () => {
           {isLoading && (
             <div className="flex gap-3 text-xs sm:text-sm">
               <div className="w-6 h-6 rounded-full bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-800 flex items-center justify-center text-blue-600 shrink-0">
-                <Sparkles className="w-3.5 h-3.5" />
+                <Sparkles className="w-3.5 h-3.5 animate-spin" />
               </div>
-              <div className="flex items-center gap-1 py-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-slate-400 animate-bounce" />
-                <span className="w-1.5 h-1.5 rounded-full bg-slate-400 animate-bounce [animation-delay:0.2s]" />
-                <span className="w-1.5 h-1.5 rounded-full bg-slate-400 animate-bounce [animation-delay:0.4s]" />
+              <div className="flex items-center gap-1.5 py-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-blue-600 animate-bounce" />
+                <span className="w-1.5 h-1.5 rounded-full bg-blue-600 animate-bounce [animation-delay:0.2s]" />
+                <span className="w-1.5 h-1.5 rounded-full bg-blue-600 animate-bounce [animation-delay:0.4s]" />
               </div>
             </div>
           )}
@@ -214,16 +291,16 @@ export const AIAssistantPage: React.FC = () => {
         </div>
 
         {/* Floating Input Box */}
-        <div className="p-3 sm:p-4 border-t border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900 space-y-2">
-          <div className="relative flex items-center rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50/70 dark:bg-slate-800/60 focus-within:border-blue-500 dark:focus-within:border-blue-400 focus-within:ring-2 focus-within:ring-blue-500/20 focus-within:bg-white dark:focus-within:bg-slate-800 transition-all shadow-xs">
+        <div className="p-3 sm:p-4 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 space-y-2">
+          <div className="relative flex items-center rounded-2xl border border-slate-300 dark:border-slate-700 bg-slate-50/70 dark:bg-slate-800/60 focus-within:border-blue-500 dark:focus-within:border-blue-400 focus-within:ring-2 focus-within:ring-blue-500/20 focus-within:bg-white dark:focus-within:bg-slate-800 transition-all shadow-xs">
             <input
               ref={inputRef}
               type="text"
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-              placeholder="Ask ToolHub..."
-              className="w-full text-xs sm:text-sm px-4 py-3 bg-transparent border-none text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none"
+              placeholder="Ask ToolHub or enter any utility request..."
+              className="w-full text-xs sm:text-sm px-4 py-3 bg-transparent border-none text-[#0F172A] dark:text-slate-100 placeholder:text-slate-400 focus:outline-none"
             />
 
             <button
@@ -232,7 +309,7 @@ export const AIAssistantPage: React.FC = () => {
               disabled={!inputText.trim() || isLoading}
               className={`mr-2 p-2 rounded-xl transition-all ${
                 inputText.trim() && !isLoading
-                  ? 'bg-gradient-to-r bg-blue-600 hover:bg-blue-700 text-white font-bold shadow-md shadow-blue-500/30 hover:scale-105'
+                  ? 'bg-blue-600 hover:bg-blue-700 text-white font-bold shadow-md shadow-blue-500/30 hover:scale-105'
                   : 'bg-slate-200 dark:bg-slate-700 text-slate-400 cursor-not-allowed'
               }`}
               title="Send message"
@@ -241,9 +318,10 @@ export const AIAssistantPage: React.FC = () => {
             </button>
           </div>
 
-          <p className="text-center text-[11px] text-slate-400">
-            ToolHub AI connects directly to utilities. All tools process files locally.
-          </p>
+          <div className="flex items-center justify-between text-[11px] text-slate-400 px-1">
+            <span>Powered by Google Gemini ({selectedModel})</span>
+            <span>All tool files process 100% locally in browser memory</span>
+          </div>
         </div>
       </Card>
     </div>

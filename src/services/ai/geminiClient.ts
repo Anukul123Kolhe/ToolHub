@@ -3,19 +3,55 @@ import { TOOLS } from '../../config/tools';
 export interface GeminiModelOption {
   id: string;
   name: string;
+  tag: string;
+  description: string;
   isLatest?: boolean;
 }
 
 export const AVAILABLE_GEMINI_MODELS: GeminiModelOption[] = [
-  { id: 'gemini-2.5-flash', name: 'Gemini 2.5 Flash (Ultra Fast & Low Latency)', isLatest: true },
-  { id: 'gemini-3-flash-preview', name: 'Gemini 3 Flash Preview (Fast)', isLatest: true },
-  { id: 'gemini-3.8-flash', name: 'Gemini 3.8 Flash' },
-  { id: 'gemini-2.5-pro', name: 'Gemini 2.5 Pro (Deep Reasoning)' },
+  {
+    id: 'gemini-2.5-flash',
+    name: 'Gemini 2.5 Flash',
+    tag: 'Recommended • Ultra Fast',
+    description: 'Latest Google flagship model with sub-second response latency and high intelligence.',
+    isLatest: true,
+  },
+  {
+    id: 'gemini-2.5-pro',
+    name: 'Gemini 2.5 Pro',
+    tag: 'Deep Reasoning',
+    description: 'Advanced reasoning, deep logic, coding, and multi-step math calculations.',
+    isLatest: true,
+  },
+  {
+    id: 'gemini-2.0-flash',
+    name: 'Gemini 2.0 Flash',
+    tag: 'Fast Multimodal',
+    description: 'High-throughput, responsive model for document, text, and photo workflows.',
+  },
+  {
+    id: 'gemini-2.0-flash-lite',
+    name: 'Gemini 2.0 Flash Lite',
+    tag: 'Ultra Lightweight',
+    description: 'Maximum processing speed with minimal token overhead.',
+  },
+  {
+    id: 'gemini-1.5-flash',
+    name: 'Gemini 1.5 Flash',
+    tag: 'High Speed',
+    description: 'Reliable, battle-tested model with 1M token context window.',
+  },
+  {
+    id: 'gemini-1.5-pro',
+    name: 'Gemini 1.5 Pro',
+    tag: 'High Capacity',
+    description: 'Deep document comprehension and comprehensive answers.',
+  },
 ];
 
 export const DEFAULT_GEMINI_MODEL = 'gemini-2.5-flash';
 
-// Official Backend Google Gemini API Key configured for ToolHub (assembled at runtime)
+// Official Built-in Google Gemini API Key configured for ToolHub (assembled at runtime)
 const getRuntimeKey = (): string => {
   const p1 = 'AQ';
   const p2 = 'Ab8RN6JRvx3ZBvn9FtjSRAFE4DppDkIqNctFv560EwJhjf3RRA';
@@ -24,7 +60,42 @@ const getRuntimeKey = (): string => {
 
 export const BACKEND_GEMINI_API_KEY = getRuntimeKey();
 
+const USER_API_KEY_STORAGE_KEY = 'toolhub_user_gemini_api_key';
+const USER_MODEL_STORAGE_KEY = 'toolhub_gemini_model';
+const USER_FAST_INTENT_KEY = 'toolhub_ai_fast_intent';
+
+export function getUserApiKey(): string {
+  if (typeof localStorage !== 'undefined') {
+    return (localStorage.getItem(USER_API_KEY_STORAGE_KEY) || '').trim();
+  }
+  return '';
+}
+
+export function saveUserApiKey(key: string): void {
+  if (typeof localStorage !== 'undefined') {
+    if (key.trim()) {
+      localStorage.setItem(USER_API_KEY_STORAGE_KEY, key.trim());
+    } else {
+      localStorage.removeItem(USER_API_KEY_STORAGE_KEY);
+    }
+  }
+}
+
+export function removeUserApiKey(): void {
+  if (typeof localStorage !== 'undefined') {
+    localStorage.removeItem(USER_API_KEY_STORAGE_KEY);
+  }
+}
+
+export function hasUserApiKey(): boolean {
+  return Boolean(getUserApiKey());
+}
+
 export function getEffectiveApiKey(): string {
+  const userKey = getUserApiKey();
+  if (userKey) {
+    return userKey;
+  }
   return (
     (typeof import.meta !== 'undefined' && (import.meta as any).env?.VITE_GEMINI_API_KEY) ||
     getRuntimeKey()
@@ -33,20 +104,34 @@ export function getEffectiveApiKey(): string {
 
 export function getPreferredModel(): string {
   if (typeof localStorage !== 'undefined') {
-    return localStorage.getItem('toolhub_gemini_model') || DEFAULT_GEMINI_MODEL;
+    return localStorage.getItem(USER_MODEL_STORAGE_KEY) || DEFAULT_GEMINI_MODEL;
   }
   return DEFAULT_GEMINI_MODEL;
 }
 
 export function savePreferredModel(model: string): void {
   if (typeof localStorage !== 'undefined') {
-    localStorage.setItem('toolhub_gemini_model', model.trim());
+    localStorage.setItem(USER_MODEL_STORAGE_KEY, model.trim());
+  }
+}
+
+export function isFastIntentEnabled(): boolean {
+  if (typeof localStorage !== 'undefined') {
+    const val = localStorage.getItem(USER_FAST_INTENT_KEY);
+    return val !== 'false'; // Enabled by default
+  }
+  return true;
+}
+
+export function setFastIntentEnabled(enabled: boolean): void {
+  if (typeof localStorage !== 'undefined') {
+    localStorage.setItem(USER_FAST_INTENT_KEY, enabled ? 'true' : 'false');
   }
 }
 
 // Compact, high-performance system instructions to minimize token overhead and accelerate response latency
 const GEMINI_SYSTEM_INSTRUCTION = `
-You are ToolHub AI Assistant, an ultra-fast in-browser utility orchestrator with 400+ utilities (100% client-side privacy).
+You are ToolHub AI Assistant, a high-speed in-browser utility orchestrator with 400+ utilities (100% client-side privacy).
 
 Response Rules:
 1. Always link to ToolHub tools using markdown format: [Tool Name](/tool/tool-id).
@@ -67,18 +152,19 @@ Key Tool Categories & Paths:
 
 const FALLBACK_MODEL_CHAIN = [
   'gemini-2.5-flash',
-  'gemini-3-flash-preview',
-  'gemini-3.8-flash',
+  'gemini-2.0-flash',
+  'gemini-1.5-flash',
   'gemini-2.5-pro',
 ];
 
-async function executeGeminiRequest(
+export async function executeGeminiRequest(
   apiKey: string,
   model: string,
   userMessage: string,
   conversationHistory: { role: 'user' | 'model'; text: string }[] = []
 ): Promise<string> {
-  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model.trim()}:generateContent?key=${apiKey.trim()}`;
+  const cleanModel = model.trim() || DEFAULT_GEMINI_MODEL;
+  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${cleanModel}:generateContent?key=${apiKey.trim()}`;
 
   const contents = [
     ...conversationHistory.slice(-4).map((item) => ({
@@ -91,23 +177,28 @@ async function executeGeminiRequest(
     },
   ];
 
-  // High-speed generation config: thinkingBudget 0 disables long reasoning pauses, delivering output in 1-2 seconds
+  // Generation config optimized for rapid response
+  const generationConfig: Record<string, any> = {
+    temperature: 0.2,
+    maxOutputTokens: 1000,
+  };
+
+  // Only pass thinkingBudget on models that support it (2.5+ or 3+)
+  if (cleanModel.includes('2.5') || cleanModel.includes('3.')) {
+    generationConfig.thinkingConfig = { thinkingBudget: 0 };
+  }
+
   const body = {
     systemInstruction: {
       parts: [{ text: GEMINI_SYSTEM_INSTRUCTION }],
     },
     contents,
-    generationConfig: {
-      temperature: 0.3,
-      maxOutputTokens: 800,
-      thinkingConfig: {
-        thinkingBudget: 0,
-      },
-    },
+    generationConfig,
   };
 
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 6500); // 6.5s safety timeout for immediate fallback
+  // 10s timeout ensures quick response without hanging indefinitely
+  const timeoutId = setTimeout(() => controller.abort(), 10000);
 
   try {
     const response = await fetch(endpoint, {
@@ -148,19 +239,18 @@ export async function callGeminiApi(
   model: string = DEFAULT_GEMINI_MODEL
 ): Promise<string> {
   const effectiveKey = apiKey.trim() || getEffectiveApiKey();
-  const initialModel = model.trim() || DEFAULT_GEMINI_MODEL;
+  const initialModel = model.trim() || getPreferredModel();
 
   try {
     return await executeGeminiRequest(effectiveKey, initialModel, userMessage, conversationHistory);
   } catch (err: any) {
     console.warn(`Request with ${initialModel} failed:`, err?.message);
 
-    // Attempt other models in the fallback chain
+    // If a custom key is provided and fails, don't silently switch to another model without trying
     for (const fallback of FALLBACK_MODEL_CHAIN) {
       if (fallback === initialModel) continue;
       try {
         const result = await executeGeminiRequest(effectiveKey, fallback, userMessage, conversationHistory);
-        savePreferredModel(fallback);
         return result;
       } catch (fallbackErr: any) {
         console.warn(`Fallback ${fallback} failed:`, fallbackErr?.message);
@@ -174,12 +264,31 @@ export async function callGeminiApi(
 export async function testGeminiConnection(
   apiKey: string = getEffectiveApiKey(),
   model: string = DEFAULT_GEMINI_MODEL
-): Promise<boolean> {
-  const testResponse = await callGeminiApi(
-    apiKey || getEffectiveApiKey(),
-    'Respond with the exact word "CONNECTED" to verify API connection.',
-    [],
-    model
-  );
-  return Boolean(testResponse);
+): Promise<{ success: boolean; message: string }> {
+  const keyToTest = apiKey.trim() || getEffectiveApiKey();
+  const modelToTest = model.trim() || getPreferredModel();
+
+  if (!keyToTest) {
+    return { success: false, message: 'No API key provided.' };
+  }
+
+  try {
+    const testResponse = await executeGeminiRequest(
+      keyToTest,
+      modelToTest,
+      'Test connection. Reply with "OK".'
+    );
+    if (testResponse) {
+      return {
+        success: true,
+        message: `Connected successfully to Google Gemini (${modelToTest})!`,
+      };
+    }
+    return { success: false, message: 'Empty response received from Google API.' };
+  } catch (err: any) {
+    return {
+      success: false,
+      message: err?.message || 'Failed to connect to Google Gemini API.',
+    };
+  }
 }
