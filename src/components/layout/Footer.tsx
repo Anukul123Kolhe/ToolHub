@@ -90,7 +90,7 @@ export const Footer: React.FC = () => {
               </li>
               <li>
                 <Link to="/settings" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
-                  Settings & API Key
+                  Settings
                 </Link>
               </li>
               <li>

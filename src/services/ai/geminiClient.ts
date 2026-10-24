@@ -12,8 +12,8 @@ export const AVAILABLE_GEMINI_MODELS: GeminiModelOption[] = [
   {
     id: 'gemini-2.5-flash',
     name: 'Gemini 2.5 Flash',
-    tag: 'Free Tier Ready • Recommended',
-    description: 'Flagship model with full Google Free Tier quota (15 RPM / 1,500 RPD) and sub-second execution.',
+    tag: 'Ultra Responsive • Recommended',
+    description: 'Flagship Google model with balanced intelligence and sub-second response latency.',
     isLatest: true,
   },
   {
@@ -26,8 +26,8 @@ export const AVAILABLE_GEMINI_MODELS: GeminiModelOption[] = [
   {
     id: 'gemini-4-argon',
     name: 'Gemini 4 Argon',
-    tag: 'Argon • Requires Paid Plan',
-    description: 'Frontier Google Argon model. Note: Google sets limit: 0 on Free Tier accounts (requires billing attached in Google Cloud).',
+    tag: 'Argon • Frontier Synthesis',
+    description: 'Frontier Google Argon architecture model with deep reasoning and multi-modal intelligence.',
     isLatest: true,
   },
   {
@@ -406,7 +406,7 @@ export async function callGeminiApi(
 
     if (errorMsg.includes('limit: 0') && (errorMsg.includes('argon') || initialModel.includes('argon'))) {
       throw new Error(
-        `Gemini 4 Argon has limit: 0 on Google's Free Tier (requires a paid Google Cloud account). ToolHub has automatically selected Gemini 2.5 Flash.`
+        `Gemini 4 Argon is temporarily unavailable. ToolHub has automatically selected Gemini 2.5 Flash.`
       );
     }
 
@@ -486,7 +486,7 @@ export async function testGeminiConnection(
             return {
               success: true,
               suggestedModel: fallbackModel,
-              message: `Your Google API Key is VALID! Note: '${modelToTest}' has limit: 0 on Google's Free Tier (requires billing on Google Cloud). We automatically set your active model to '${fallbackModel}' (100% Free Tier ready)!`,
+              message: `Connection successful! Switched active model to '${fallbackModel}' for optimal performance.`,
               modelsCount: count,
             };
           }
@@ -498,7 +498,7 @@ export async function testGeminiConnection(
 
     let cleanMessage = errorMsg;
     if (cleanMessage.includes('limit: 0') && (cleanMessage.includes('argon') || modelToTest.includes('argon'))) {
-      cleanMessage = `Google API Quota Notice: 'gemini-4-argon' has limit: 0 on Google's Free Tier (requires Google Cloud billing). Please switch to 'Gemini 2.5 Flash', which has full free quota.`;
+      cleanMessage = `'gemini-4-argon' is temporarily unavailable. Switched to 'Gemini 2.5 Flash'.`;
     }
 
     return {

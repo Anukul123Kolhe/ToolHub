@@ -5,18 +5,14 @@ import {
   ArrowUp,
   RotateCcw,
   Settings,
-  Zap,
-  Key,
   ChevronDown,
 } from 'lucide-react';
 import { Card } from '../components/common/Card';
 import { Breadcrumbs } from '../components/layout/Breadcrumbs';
 import {
   callGeminiApi,
-  getEffectiveApiKey,
   getPreferredModel,
   savePreferredModel,
-  hasUserApiKey,
   AVAILABLE_GEMINI_MODELS,
   getAllAvailableModels,
   normalizeModelId,
@@ -30,7 +26,6 @@ export const AIAssistantPage: React.FC = () => {
   const [availableModels, setAvailableModels] = useState<GeminiModelOption[]>(() => getAllAvailableModels());
   const [selectedModel, setSelectedModel] = useState<string>(() => getPreferredModel());
   const [copiedId, setCopiedId] = useState<string | null>(null);
-  const [userKeyActive, setUserKeyActive] = useState<boolean>(() => hasUserApiKey());
 
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputText, setInputText] = useState<string>('');
@@ -43,7 +38,6 @@ export const AIAssistantPage: React.FC = () => {
   useEffect(() => {
     setAvailableModels(getAllAvailableModels());
     setSelectedModel(getPreferredModel());
-    setUserKeyActive(hasUserApiKey());
   }, []);
 
   useEffect(() => {
@@ -62,7 +56,7 @@ export const AIAssistantPage: React.FC = () => {
     savePreferredModel(normalized);
   };
 
-  const sendMessage = async (messageText: string, activeApiKey: string) => {
+  const sendMessage = async (messageText: string) => {
     setIsLoading(true);
 
     try {
@@ -101,7 +95,7 @@ export const AIAssistantPage: React.FC = () => {
         }));
 
       const aiResponse = await callGeminiApi(
-        activeApiKey,
+        '',
         messageText,
         history,
         selectedModel
@@ -125,15 +119,12 @@ export const AIAssistantPage: React.FC = () => {
     } catch (err: any) {
       console.error('Gemini API Error:', err);
       const fallback = resolveNaturalLanguageIntent(messageText);
-      const quotaNotice = err?.message?.includes('limit: 0')
-        ? `\n\n> 💡 *Note: The selected model has limit: 0 on Google Free Tier. Switched to Gemini 2.5 Flash.*`
-        : '';
       setMessages((prev) => [
         ...prev,
         {
           id: `assistant-${Date.now()}`,
           sender: 'assistant',
-          text: (fallback.message || '') + quotaNotice,
+          text: fallback.message,
           timestamp: Date.now(),
         },
       ]);
@@ -156,8 +147,7 @@ export const AIAssistantPage: React.FC = () => {
     setMessages((prev) => [...prev, userMsg]);
     if (!customText) setInputText('');
 
-    const currentKey = getEffectiveApiKey();
-    await sendMessage(text, currentKey);
+    await sendMessage(text);
   };
 
   const quickPrompts = [
@@ -172,7 +162,7 @@ export const AIAssistantPage: React.FC = () => {
       <Breadcrumbs items={[{ label: 'AI Assistant' }]} />
 
       <Card className="flex flex-col h-[740px] max-h-[85vh] overflow-hidden border border-slate-200 dark:border-slate-800 shadow-xl rounded-2xl bg-white dark:bg-slate-900">
-        {/* Header with Model Selector & API Key Status */}
+        {/* Header with Model Selector */}
         <div className="flex items-center justify-between px-4 sm:px-5 py-3 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 select-none">
           {/* Top Left: Title, Active Google Model Dropdown & Key Badge */}
           <div className="flex items-center gap-3">
@@ -206,23 +196,6 @@ export const AIAssistantPage: React.FC = () => {
               </select>
               <ChevronDown className="w-3.5 h-3.5 absolute right-2 pointer-events-none text-slate-400" />
             </div>
-
-            {/* API Key Status Indicator */}
-            {userKeyActive ? (
-              <span className="hidden sm:inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-950/70 dark:text-emerald-300 border border-emerald-300">
-                <Key className="w-2.5 h-2.5" />
-                Custom Key
-              </span>
-            ) : (
-              <button
-                type="button"
-                onClick={() => navigate('/settings')}
-                className="hidden md:inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300 border border-blue-200 hover:bg-blue-100 transition-colors"
-                title="Configure your own Google API Key in Settings"
-              >
-                + Add API Key
-              </button>
-            )}
           </div>
 
           {/* Right Controls */}
@@ -240,7 +213,7 @@ export const AIAssistantPage: React.FC = () => {
               type="button"
               onClick={() => navigate('/settings')}
               className="p-1.5 rounded-lg text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-              title="Settings & API Key"
+              title="Settings"
             >
               <Settings className="w-4 h-4" />
             </button>
