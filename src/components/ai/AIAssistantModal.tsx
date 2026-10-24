@@ -6,17 +6,10 @@ import {
   X,
   RotateCcw,
   Settings,
-  ChevronDown,
 } from 'lucide-react';
 import {
   callGeminiApi,
-  getPreferredModel,
-  savePreferredModel,
-  AVAILABLE_GEMINI_MODELS,
-  getAllAvailableModels,
-  normalizeModelId,
   isFastIntentEnabled,
-  GeminiModelOption,
 } from '../../services/ai/geminiClient';
 import { resolveNaturalLanguageIntent } from '../../services/ai/aiService';
 import { ChatMessageItem, ChatMessage } from './ChatMessageItem';
@@ -27,8 +20,6 @@ interface AIAssistantModalProps {
 }
 
 export const AIAssistantModal: React.FC<AIAssistantModalProps> = ({ isOpen, onClose }) => {
-  const [availableModels, setAvailableModels] = useState<GeminiModelOption[]>(() => getAllAvailableModels());
-  const [selectedModel, setSelectedModel] = useState<string>(() => getPreferredModel());
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -41,8 +32,6 @@ export const AIAssistantModal: React.FC<AIAssistantModalProps> = ({ isOpen, onCl
 
   useEffect(() => {
     if (isOpen) {
-      setAvailableModels(getAllAvailableModels());
-      setSelectedModel(getPreferredModel());
       setTimeout(() => inputRef.current?.focus(), 100);
     }
   }, [isOpen]);
@@ -55,12 +44,6 @@ export const AIAssistantModal: React.FC<AIAssistantModalProps> = ({ isOpen, onCl
     navigator.clipboard.writeText(text);
     setCopiedId(id);
     setTimeout(() => setCopiedId(null), 2000);
-  };
-
-  const handleModelChange = (newModel: string) => {
-    const normalized = normalizeModelId(newModel);
-    setSelectedModel(normalized);
-    savePreferredModel(normalized);
   };
 
   const sendMessage = async (messageText: string) => {
@@ -93,7 +76,7 @@ export const AIAssistantModal: React.FC<AIAssistantModalProps> = ({ isOpen, onCl
         }
       }
 
-      // 2. High-speed Google Gemini API inference with selected model
+      // 2. High-speed AI inference
       const history = messages
         .slice(-6)
         .map((m) => ({
@@ -104,15 +87,8 @@ export const AIAssistantModal: React.FC<AIAssistantModalProps> = ({ isOpen, onCl
       const aiResponse = await callGeminiApi(
         '',
         messageText,
-        history,
-        selectedModel
+        history
       );
-
-      // If the model was automatically switched to a working fallback, sync UI state
-      const currentPreferred = getPreferredModel();
-      if (currentPreferred && currentPreferred !== selectedModel) {
-        setSelectedModel(currentPreferred);
-      }
 
       setMessages((prev) => [
         ...prev,
@@ -124,7 +100,7 @@ export const AIAssistantModal: React.FC<AIAssistantModalProps> = ({ isOpen, onCl
         },
       ]);
     } catch (err: any) {
-      console.error('Gemini API Error:', err);
+      console.error('AI Assistant Error:', err);
       const fallback = resolveNaturalLanguageIntent(messageText);
       setMessages((prev) => [
         ...prev,
@@ -175,42 +151,18 @@ export const AIAssistantModal: React.FC<AIAssistantModalProps> = ({ isOpen, onCl
           className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity"
         />
 
-        {/* ChatGPT / Gemini Style Chat Window */}
+        {/* Modal Window */}
         <div className="relative w-full max-w-2xl transform overflow-hidden rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl text-left transition-all flex flex-col h-[650px] max-h-[90vh]">
-          {/* Header with Model Selector */}
+          {/* Header */}
           <div className="flex items-center justify-between px-4 py-3 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 select-none">
-            {/* Top Left: Title, Active Google Model Dropdown & Key Badge */}
-            <div className="flex items-center gap-2 sm:gap-3">
-              <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-lg bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-800 flex items-center justify-center text-blue-600 shadow-2xs">
-                  <Sparkles className="w-4 h-4" />
-                </div>
-                <span className="font-extrabold text-sm text-[#0F172A] dark:text-white tracking-tight hidden xs:inline">
-                  AI Assistant
-                </span>
+            {/* Top Left: Title */}
+            <div className="flex items-center gap-2">
+              <div className="w-7 h-7 rounded-lg bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-800 flex items-center justify-center text-blue-600 shadow-2xs">
+                <Sparkles className="w-4 h-4" />
               </div>
-
-              {/* Google Gemini Model Selector */}
-              <div className="relative flex items-center">
-                <select
-                  value={selectedModel}
-                  onChange={(e) => handleModelChange(e.target.value)}
-                  className="text-xs font-bold text-slate-700 dark:text-slate-200 bg-slate-100 hover:bg-slate-200/80 dark:bg-slate-800 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-700 rounded-lg pl-2.5 pr-7 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer appearance-none transition-colors max-w-[190px] truncate"
-                  title="Select Google Gemini Model"
-                >
-                  {availableModels.map((m) => (
-                    <option key={m.id} value={m.id}>
-                      {m.name} ({m.tag})
-                    </option>
-                  ))}
-                  {!availableModels.some((m) => m.id === selectedModel) && (
-                    <option value={selectedModel}>
-                      Custom: {selectedModel}
-                    </option>
-                  )}
-                </select>
-                <ChevronDown className="w-3.5 h-3.5 absolute right-2 pointer-events-none text-slate-400" />
-              </div>
+              <span className="font-extrabold text-sm text-[#0F172A] dark:text-white tracking-tight">
+                AI Assistant
+              </span>
             </div>
 
             {/* Right Controls */}
@@ -248,51 +200,54 @@ export const AIAssistantModal: React.FC<AIAssistantModalProps> = ({ isOpen, onCl
           </div>
 
           {/* Conversation Stream */}
-          <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4 space-y-5">
-            {/* Empty State / Welcome Screen */}
+          <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4 space-y-4">
+            {/* Empty State */}
             {messages.length === 0 && (
-              <div className="h-full flex flex-col items-center justify-center text-center max-w-lg mx-auto py-8 space-y-6">
-                <div className="w-12 h-12 rounded-full bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-800 flex items-center justify-center text-blue-600 shadow-xs">
-                  <Sparkles className="w-6 h-6" />
+              <div className="h-full flex flex-col items-center justify-center text-center max-w-md mx-auto py-6 space-y-4">
+                <div className="w-10 h-10 rounded-full bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-800 flex items-center justify-center text-blue-600 shadow-xs">
+                  <Sparkles className="w-5 h-5" />
                 </div>
 
                 <div className="space-y-1">
-                  <h2 className="text-xl sm:text-2xl font-black text-[#0F172A] dark:text-white">
-                    What can I help with?
-                  </h2>
-                  <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 font-medium">
-                    Search and run utilities, process files, format code, or calculate formulas.
+                  <h3 className="text-lg font-black text-[#0F172A] dark:text-white">
+                    How can ToolHub help?
+                  </h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                    Ask to compress images, merge PDFs, format JSON, or compute grades.
                   </p>
                 </div>
 
-                {/* Prompt Cards */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 w-full pt-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 w-full text-left">
                   {quickPrompts.map((p, idx) => (
                     <button
                       key={idx}
                       type="button"
                       onClick={() => handleSend(p.title)}
-                      className="p-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-white/70 dark:bg-slate-800/40 hover:bg-blue-50/70 dark:hover:bg-blue-950/50 hover:border-blue-400 dark:hover:border-blue-700 text-left transition-all"
+                      className="p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-900/60 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all text-left flex flex-col justify-between group"
                     >
-                      <p className="text-xs font-bold text-[#0F172A] dark:text-slate-200">{p.title}</p>
-                      <p className="text-[11px] text-slate-500 mt-0.5 font-normal">{p.desc}</p>
+                      <span className="text-xs font-bold text-slate-800 dark:text-slate-200 group-hover:text-blue-600 transition-colors">
+                        {p.title}
+                      </span>
+                      <span className="text-[10px] text-slate-400 mt-0.5">
+                        {p.desc}
+                      </span>
                     </button>
                   ))}
                 </div>
               </div>
             )}
 
-            {/* Message History */}
+            {/* Messages */}
             {messages.map((msg) => (
               <ChatMessageItem
                 key={msg.id}
                 message={msg}
+                isCopied={copiedId === msg.id}
+                onCopy={handleCopyMessage}
                 onNavigateTool={(path) => {
                   onClose();
                   navigate(path);
                 }}
-                onCopy={handleCopyMessage}
-                isCopied={copiedId === msg.id}
                 onOpenSettings={() => {
                   onClose();
                   navigate('/settings');
@@ -300,16 +255,17 @@ export const AIAssistantModal: React.FC<AIAssistantModalProps> = ({ isOpen, onCl
               />
             ))}
 
-            {/* Typing / Generating Indicator */}
+            {/* Loading Indicator */}
             {isLoading && (
-              <div className="flex gap-3 text-xs sm:text-sm">
-                <div className="w-6 h-6 rounded-full bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-800 flex items-center justify-center text-blue-600 shrink-0">
+              <div className="flex items-start gap-3">
+                <div className="w-7 h-7 rounded-full bg-blue-600 text-white flex items-center justify-center shrink-0 shadow-xs">
                   <Sparkles className="w-3.5 h-3.5 animate-spin" />
                 </div>
-                <div className="flex items-center gap-1.5 py-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-blue-600 animate-bounce" />
-                  <span className="w-1.5 h-1.5 rounded-full bg-blue-600 animate-bounce [animation-delay:0.2s]" />
-                  <span className="w-1.5 h-1.5 rounded-full bg-blue-600 animate-bounce [animation-delay:0.4s]" />
+                <div className="p-3 rounded-2xl rounded-tl-sm bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/60 text-xs text-slate-500 flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-blue-600 animate-bounce"></span>
+                  <span className="w-1.5 h-1.5 rounded-full bg-blue-600 animate-bounce [animation-delay:0.2s]"></span>
+                  <span className="w-1.5 h-1.5 rounded-full bg-blue-600 animate-bounce [animation-delay:0.4s]"></span>
+                  <span className="text-slate-400 font-medium ml-1">Thinking...</span>
                 </div>
               </div>
             )}
@@ -317,7 +273,7 @@ export const AIAssistantModal: React.FC<AIAssistantModalProps> = ({ isOpen, onCl
             <div ref={messagesEndRef} />
           </div>
 
-          {/* ChatGPT Style Floating Input Box */}
+          {/* Floating Input Box */}
           <div className="p-3 sm:p-4 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 space-y-2">
             <div className="relative flex items-center rounded-2xl border border-slate-300 dark:border-slate-700 bg-slate-50/70 dark:bg-slate-800/60 focus-within:border-blue-500 dark:focus-within:border-blue-400 focus-within:ring-2 focus-within:ring-blue-500/20 focus-within:bg-white dark:focus-within:bg-slate-800 transition-all shadow-xs">
               <input
@@ -346,7 +302,7 @@ export const AIAssistantModal: React.FC<AIAssistantModalProps> = ({ isOpen, onCl
             </div>
 
             <div className="flex items-center justify-between text-[11px] text-slate-400 px-1">
-              <span>Google Gemini ({selectedModel})</span>
+              <span>Instant AI Assistant</span>
               <span>100% Client-Side Privacy</span>
             </div>
           </div>
