@@ -30,7 +30,7 @@ export const ToolsCatalogPage: React.FC = () => {
             Tool Directory
           </h1>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-            Browse and filter through all 140+ privacy-first client-side utilities
+            Browse and filter through all 400+ privacy-first client-side utilities
           </p>
         </div>
 

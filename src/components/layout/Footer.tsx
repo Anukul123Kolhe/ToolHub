@@ -75,7 +75,7 @@ export const Footer: React.FC = () => {
               </li>
               <li>
                 <Link to="/tools" className="hover:text-sky-500 transition-colors">
-                  Complete 140+ Tool Catalog
+                  Complete 400+ Tool Catalog
                 </Link>
               </li>
               <li>

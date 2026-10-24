@@ -129,7 +129,7 @@ function formatCategoryToolList(categoryName: string, tools: ToolRegistryItem[])
 
 function formatAllCategoriesOverview(): string {
   return [
-    `ToolHub features **140+ privacy-first utilities** across 11 major categories. All file operations run **100% locally in your browser** with zero server uploads:`,
+    `ToolHub features **400+ privacy-first utilities** across 11 major categories. All file operations run **100% locally in your browser** with zero server uploads:`,
     '',
     `### 📄 PDF & Documents (17 Tools)`,
     `* [Merge PDFs](/tool/pdf-merge) • [Split PDFs](/tool/pdf-split) • [Compress PDFs](/tool/pdf-compress) • [PDF to Images](/tool/pdf-to-images) • [Images to PDF](/tool/images-to-pdf) • [Sign PDF](/tool/pdf-sign) • [Protect PDF](/tool/pdf-protect)`,
@@ -627,7 +627,7 @@ export function resolveNaturalLanguageIntent(
   // 6. DEFAULT HELPFUL GEMINI/CHATGPT PROMPT
   return {
     message: [
-      `I'm your **ToolHub Assistant**. I can help you find, launch, and execute utilities from our **140+ in-browser tools**.`,
+      `I'm your **ToolHub Assistant**. I can help you find, launch, and execute utilities from our **400+ in-browser tools**.`,
       '',
       `Here are a few things you can ask me:`,
       `* *"Give me list of image tools"* or *"Show me PDF tools"*`,

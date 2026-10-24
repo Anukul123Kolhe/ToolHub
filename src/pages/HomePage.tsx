@@ -69,7 +69,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onOpenSearch, onOpenAIAssist
 
         <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-sky-50 dark:bg-sky-950/60 border border-sky-200 dark:border-sky-800 text-xs font-semibold text-sky-700 dark:text-sky-300 mb-6">
           <Sparkles className="w-3.5 h-3.5 text-sky-500" />
-          <span>Unified Online Utility Platform • 140+ Working Tools</span>
+          <span>Unified Online Utility Platform • 400+ Working Tools</span>
         </div>
 
         <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-[1.15]">
@@ -92,7 +92,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onOpenSearch, onOpenAIAssist
             <div className="flex items-center gap-3 text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300 transition-colors">
               <Search className="w-5 h-5 text-sky-500" />
               <span className="text-sm font-medium">
-                Search 140+ tools (e.g., "compress image", "pdf merge", "sgpa")...
+                Search 400+ tools (e.g., "compress image", "pdf merge", "sgpa")...
               </span>
             </div>
             <kbd className="hidden sm:inline-flex items-center gap-1 font-mono text-xs bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-2 py-1 rounded-md text-slate-500">

@@ -38,7 +38,7 @@ export const ToolWorkspacePage: React.FC = () => {
           to="/tools"
           className="inline-flex items-center gap-1 text-xs font-semibold text-sky-600 hover:underline"
         >
-          <span>Browse All 140+ Tools</span>
+          <span>Browse All 400+ Tools</span>
           <ArrowRight className="w-3.5 h-3.5" />
         </Link>
       </div>

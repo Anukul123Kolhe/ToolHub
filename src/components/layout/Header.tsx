@@ -57,7 +57,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSearch, onOpenAIAssistant 
         >
           <div className="flex items-center gap-2">
             <Search className="w-4 h-4 text-slate-400" />
-            <span>Search 140+ tools or describe your task...</span>
+            <span>Search 400+ tools or describe your task...</span>
           </div>
           <kbd className="inline-flex items-center gap-0.5 font-mono text-[10px] bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 px-1.5 py-0.5 rounded shadow-xs text-slate-600 dark:text-slate-300">
             <span className="text-xs">⌘</span>K
@@ -160,7 +160,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSearch, onOpenAIAssistant 
             onClick={() => setMobileMenuOpen(false)}
             className="block px-3 py-2 text-sm font-medium rounded-lg text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-900"
           >
-            All 140+ Tools
+            All 400+ Tools
           </Link>
           <button
             type="button"

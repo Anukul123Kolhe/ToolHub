@@ -46,7 +46,7 @@ export function savePreferredModel(model: string): void {
 
 // Compact, high-performance system instructions to minimize token overhead and accelerate response latency
 const GEMINI_SYSTEM_INSTRUCTION = `
-You are ToolHub AI Assistant, an ultra-fast in-browser utility orchestrator with 140+ utilities (100% client-side privacy).
+You are ToolHub AI Assistant, an ultra-fast in-browser utility orchestrator with 400+ utilities (100% client-side privacy).
 
 Response Rules:
 1. Always link to ToolHub tools using markdown format: [Tool Name](/tool/tool-id).

@@ -228,7 +228,7 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({ isOpen, on
                 to close
               </span>
             </div>
-            <span className="font-medium text-slate-500">140+ utilities loaded</span>
+            <span className="font-medium text-slate-500">400+ utilities loaded</span>
           </div>
         </div>
       </div>

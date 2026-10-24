@@ -29,21 +29,48 @@ interface ToolDispatcherProps {
 export const ToolDispatcher: React.FC<ToolDispatcherProps> = ({ tool }) => {
   switch (tool.id) {
     case 'image-compressor':
+    case 'img-compress-image':
+    case 'img-reduce-image-file-size':
+    case 'img-optimize-images-for-web-use':
+    case 'img-compress-multiple-images':
       return <ImageCompressorTool />;
     case 'image-exact-size':
     case 'application-image-compressor':
+    case 'img-compress-image-to-an-exact-kb-target':
+    case 'img-compress-exact-kb':
+    case 'img-compress-image-to-an-mb-target':
+    case 'img-resize-photos-to-exact-file-size-limits':
       return <ImageExactSizeTool />;
     case 'image-resizer':
     case 'signature-resizer':
+    case 'img-resize-image-by-pixels':
+    case 'img-resize-by-pixels':
+    case 'img-resize-image-by-percentage':
+    case 'img-resize-image-by-centimetres-millimetres-or-inches':
+    case 'img-signature-resizing-to-exact-dimensions':
+    case 'img-passport-and-id-photo-resizer':
+    case 'img-pan-card-photo-resizing':
+    case 'img-convert-image-to-specific-pixel-dimensions':
+    case 'img-resize-multiple-images':
       return <ImageResizerTool />;
     case 'pdf-merge':
     case 'assignment-pdf-merger':
+    case 'pdf-merge-pdf':
+    case 'pdf-assemble-pdf':
       return <PdfMergeTool />;
     case 'pdf-split':
     case 'pdf-extract-pages':
+    case 'pdf-split-pdf':
+    case 'pdf-remove-pdf-pages':
+    case 'pdf-delete-pages':
       return <PdfSplitTool />;
     case 'images-to-pdf':
     case 'photo-to-pdf':
+    case 'pdf-jpg-to-pdf':
+    case 'pdf-png-to-pdf':
+    case 'pdf-webp-to-pdf':
+    case 'pdf-images-to-pdf':
+    case 'pdf-image-to-pdf-converter':
       return <ImagesToPdfTool />;
     case 'sgpa-calculator':
     case 'cgpa-calculator':
@@ -70,14 +97,20 @@ export const ToolDispatcher: React.FC<ToolDispatcherProps> = ({ tool }) => {
     case 'qr-generator':
     case 'qr-wifi':
     case 'qr-vcard':
+    case 'pdf-generate-qr-code':
       return <QrGeneratorTool />;
     case 'password-generator':
+    case 'pdf-generate-password':
+    case 'prod-password-generator':
       return <PasswordGeneratorTool />;
     case 'calc-emi':
+    case 'calc-mortgage-calculator':
       return <EmiCalculatorTool />;
     case 'calc-age':
+    case 'calc-birthday-calculator':
       return <AgeCalculatorTool />;
     case 'calc-gst':
+    case 'calc-discount-calculator':
       return <GstCalculatorTool />;
     case 'word-counter':
     case 'student-word-counter':
@@ -86,6 +119,7 @@ export const ToolDispatcher: React.FC<ToolDispatcherProps> = ({ tool }) => {
     case 'case-lowercase':
     case 'case-title':
     case 'case-sentence':
+    case 'text-online-text-editor':
       return <WordCounterTool />;
     default:
       return <GenericToolWorkspace tool={tool} />;
