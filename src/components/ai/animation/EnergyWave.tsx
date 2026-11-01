@@ -3,11 +3,13 @@ import { TravelingParticles } from './TravelingParticles';
 
 interface EnergyWaveProps {
   isVertical?: boolean;
+  isAnalyzing?: boolean;
   isCompleted?: boolean;
 }
 
 export const EnergyWave: React.FC<EnergyWaveProps> = ({
   isVertical = false,
+  isAnalyzing = false,
   isCompleted = false,
 }) => {
   return (
@@ -21,6 +23,8 @@ export const EnergyWave: React.FC<EnergyWaveProps> = ({
         className={`absolute inset-0 rounded-full blur-xl transition-all duration-700 ${
           isCompleted
             ? 'bg-emerald-400/20'
+            : isAnalyzing
+            ? 'bg-gradient-to-r from-violet-500/25 via-fuchsia-400/30 to-sky-300/20 animate-pulse'
             : 'bg-gradient-to-r from-blue-500/25 via-cyan-400/30 to-sky-300/20 animate-pulse'
         }`}
       />
@@ -36,7 +40,11 @@ export const EnergyWave: React.FC<EnergyWaveProps> = ({
             <linearGradient id="verticalEnergyGrad" x1="0%" y1="0%" x2="0%" y2="100%">
               <stop offset="0%" stopColor="#38BDF8" stopOpacity="0.4" />
               <stop offset="50%" stopColor="#FFFFFF" stopOpacity="1" />
-              <stop offset="100%" stopColor={isCompleted ? '#34D399' : '#818CF8'} stopOpacity="0.9" />
+              <stop
+                offset="100%"
+                stopColor={isCompleted ? '#34D399' : isAnalyzing ? '#C084FC' : '#818CF8'}
+                stopOpacity="0.9"
+              />
             </linearGradient>
 
             <filter id="vertGlow" x="-30%" y="-30%" width="160%" height="160%">
@@ -49,7 +57,7 @@ export const EnergyWave: React.FC<EnergyWaveProps> = ({
           <path
             d="M 30 0 Q 15 25, 30 50 T 30 100"
             fill="none"
-            stroke={isCompleted ? '#10B981' : '#38BDF8'}
+            stroke={isCompleted ? '#10B981' : isAnalyzing ? '#8B5CF6' : '#38BDF8'}
             strokeWidth="8"
             strokeOpacity="0.25"
             filter="url(#vertGlow)"
@@ -89,7 +97,11 @@ export const EnergyWave: React.FC<EnergyWaveProps> = ({
               <stop offset="0%" stopColor="#38BDF8" stopOpacity="0.5" />
               <stop offset="45%" stopColor="#FFFFFF" stopOpacity="1" />
               <stop offset="75%" stopColor="#60A5FA" stopOpacity="0.9" />
-              <stop offset="100%" stopColor={isCompleted ? '#34D399' : '#A78BFA'} stopOpacity="0.8" />
+              <stop
+                offset="100%"
+                stopColor={isCompleted ? '#34D399' : isAnalyzing ? '#C084FC' : '#A78BFA'}
+                stopOpacity="0.8"
+              />
             </linearGradient>
 
             <filter id="horizGlow" x="-20%" y="-40%" width="140%" height="180%">
@@ -102,7 +114,7 @@ export const EnergyWave: React.FC<EnergyWaveProps> = ({
           <path
             d="M 0 30 Q 50 10, 100 30 T 200 30"
             fill="none"
-            stroke={isCompleted ? '#10B981' : '#38BDF8'}
+            stroke={isCompleted ? '#10B981' : isAnalyzing ? '#8B5CF6' : '#38BDF8'}
             strokeWidth="9"
             strokeOpacity="0.3"
             filter="url(#horizGlow)"
@@ -134,7 +146,7 @@ export const EnergyWave: React.FC<EnergyWaveProps> = ({
           <path
             d="M 0 30 Q 50 50, 100 30 T 200 30"
             fill="none"
-            stroke={isCompleted ? '#34D399' : '#60A5FA'}
+            stroke={isCompleted ? '#34D399' : isAnalyzing ? '#C084FC' : '#60A5FA'}
             strokeWidth="1.5"
             strokeOpacity="0.45"
             strokeDasharray="4 6"
@@ -143,7 +155,7 @@ export const EnergyWave: React.FC<EnergyWaveProps> = ({
       )}
 
       {/* Floating and Traveling Particles */}
-      <TravelingParticles isVertical={isVertical} isCompleted={isCompleted} />
+      <TravelingParticles isVertical={isVertical} isAnalyzing={isAnalyzing} isCompleted={isCompleted} />
     </div>
   );
 };

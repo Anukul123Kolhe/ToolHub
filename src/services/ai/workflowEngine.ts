@@ -1,5 +1,6 @@
 import { EXECUTABLE_TOOLS, ProcessedFile } from './toolRegistry';
 import { formatBytes } from '../../utils/file';
+import { executeGeminiRequest, getEffectiveApiKey, DEFAULT_GEMINI_MODEL } from './geminiClient';
 
 export interface MechanicalLogEntry {
   id: string;
@@ -38,6 +39,7 @@ export interface ClarificationOption {
 export interface ExecutionPlan {
   id: string;
   userPrompt: string;
+  understoodIntent?: string;
   steps: ExecutionStep[];
   needsClarification: boolean;
   clarificationQuestion?: string;
@@ -79,6 +81,7 @@ export function parseWorkflowInstruction(prompt: string, uploadedFiles: File[]):
     return {
       id: planId,
       userPrompt: prompt,
+      understoodIntent: `Compress ${imageFiles.length} image(s) to reduce file size (awaiting your target size preference).`,
       steps: [
         {
           id: 'step_compress',
@@ -459,12 +462,186 @@ export function parseWorkflowInstruction(prompt: string, uploadedFiles: File[]):
     }
   }
 
+  // Generate high-clarity natural language understoodIntent
+  let understoodIntent = '';
+  if (steps.length === 1) {
+    understoodIntent = steps[0].description;
+  } else if (steps.length > 1) {
+    const actions = steps.map((s) => s.toolName).join(' ➔ ');
+    understoodIntent = `Sequential Pipeline: ${actions} for ${uploadedFiles.length || 'provided'} file(s).`;
+  } else {
+    understoodIntent = prompt || 'Custom file operation';
+  }
+
   return {
     id: planId,
     userPrompt: prompt,
+    understoodIntent,
     steps,
     needsClarification: false,
   };
+}
+
+/**
+ * Asynchronous AI Task Understanding Engine powered by Google Gemini API
+ * Connects the backend Gemini API to deeply understand what the user wants with their specific files
+ * before synthesizing and executing the mechanical tool pipeline.
+ */
+export async function parseWorkflowInstructionWithAI(
+  prompt: string,
+  uploadedFiles: File[],
+  onLogEntry?: (entry: MechanicalLogEntry) => void
+): Promise<ExecutionPlan> {
+  const apiKey = getEffectiveApiKey();
+  const fileSummary = uploadedFiles
+    .map((f, i) => `${i + 1}. "${f.name}" (${f.type || 'binary'}, ${formatBytes(f.size)})`)
+    .join('\n');
+
+  onLogEntry?.({
+    id: `intent_${Date.now()}_start`,
+    timestamp: getMechanicalTimestamp(),
+    level: 'INIT',
+    message: `[AI REASONING] Contacting Google Gemini AI backend with ${uploadedFiles.length} file metadata and user prompt...`,
+  });
+
+  if (apiKey) {
+    try {
+      const systemInstruction = `You are ToolHub's AI Task Understanding Engine.
+Your mission is to analyze the user's natural language request and uploaded files, comprehend what they want to achieve, and output an exact sequential execution plan using ToolHub's built-in tools.
+
+Available Tool IDs:
+- "image-converter": converts images to another format. parameters: { "format": "jpg" | "png" | "webp" }
+- "image-compressor": compresses images. parameters: { "targetKb": number (optional), "quality": number (optional) }
+- "image-resizer": resizes images. parameters: { "preset": "passport" | "signature" (optional), "width": number (optional), "height": number (optional) }
+- "images-to-pdf": converts multiple/single images into a single PDF document. parameters: {}
+- "pdf-merge": merges 2+ PDF files into one PDF. parameters: {}
+- "pdf-split": extracts or removes pages. parameters: { "pageRange": string (e.g. "1,3,5" or "1-4") }
+- "pdf-page-numbers": adds page numbers to PDF. parameters: {}
+- "file-zip-create": bundles files into a ZIP archive. parameters: { "archiveName": string (optional) }
+- "word-counter": counts words and characters in text. parameters: {}
+- "text-cleaner": cleans extra spaces/lines from text. parameters: {}
+- "dev-json-formatter": formats and indents JSON. parameters: { "indent": 2 }
+- "qr-generator": generates QR code. parameters: { "text": string }
+
+Respond ONLY with a single JSON object strictly matching this schema (NO code fences, NO markdown formatting):
+{
+  "understoodIntent": "Clear, concise sentence summarizing what the user wants to accomplish with their specific files",
+  "needsClarification": boolean,
+  "clarificationQuestion": string | null,
+  "clarificationOptions": [
+    { "label": string, "value": string, "parameters": object }
+  ] | null,
+  "steps": [
+    {
+      "toolId": string,
+      "description": string,
+      "phaseName": string,
+      "engineName": string,
+      "parameters": object
+    }
+  ]
+}
+
+Rules:
+- Order steps logically: format conversion -> compression -> archiving.
+- If compression lacks target size, set "needsClarification": true with options.
+- Use only the listed toolIds.`;
+
+      const userContent = `User Request:
+"${prompt}"
+
+Uploaded Files:
+${fileSummary || 'No files uploaded.'}`;
+
+      const responseText = await executeGeminiRequest(
+        apiKey,
+        DEFAULT_GEMINI_MODEL,
+        userContent,
+        [{ role: 'user', text: systemInstruction }],
+        false
+      );
+
+      const cleanJson = responseText.replace(/```(?:json)?/gi, '').replace(/```/g, '').trim();
+      const parsed = JSON.parse(cleanJson);
+
+      if (parsed && Array.isArray(parsed.steps) && parsed.steps.length > 0) {
+        onLogEntry?.({
+          id: `intent_${Date.now()}_done`,
+          timestamp: getMechanicalTimestamp(),
+          level: 'SUCCESS',
+          message: `[AI UNDERSTOOD] "${parsed.understoodIntent || 'Processed user intent successfully'}"`,
+        });
+
+        const mappedSteps: ExecutionStep[] = parsed.steps.map((st: any, idx: number) => {
+          const tool = EXECUTABLE_TOOLS[st.toolId];
+          const subOps =
+            st.subOperations ||
+            (st.toolId === 'image-compressor'
+              ? [
+                  'Inspect input image dimensions and density',
+                  'Iterative quality matrix calibration',
+                  'Generate compressed payload',
+                ]
+              : st.toolId === 'image-converter'
+              ? [
+                  'Decode image bitstream into 24-bit canvas',
+                  `Transcode pixel array to ${st.parameters?.format?.toUpperCase() || 'target'} format`,
+                  'Serialize image blob into output memory',
+                ]
+              : st.toolId === 'file-zip-create'
+              ? [
+                  'Construct in-memory file allocation table',
+                  'Stream raw bytes through Deflate compressor',
+                  'Generate ZIP central directory and CRC-32 checksums',
+                ]
+              : st.toolId === 'pdf-merge'
+              ? [
+                  'Inspect and index input PDF page trees',
+                  'Copy page vectors into unified document',
+                  'Serialize combined PDF stream',
+                ]
+              : [
+                  'Ingesting input buffers',
+                  'Executing transformation engine',
+                  'Finalizing output artifact',
+                ]);
+
+          return {
+            id: `step_${idx + 1}_${st.toolId}`,
+            toolId: st.toolId,
+            toolName: tool?.name || st.toolId,
+            phaseName: st.phaseName || tool?.name || 'Execution Phase',
+            engineName: st.engineName || 'Client-Side Engine',
+            description: st.description || `Execute ${tool?.name || st.toolId}`,
+            subOperations: subOps,
+            parameters: st.parameters || {},
+            status: 'pending' as const,
+            progress: 0,
+          };
+        });
+
+        return {
+          id: `plan_${Date.now()}`,
+          userPrompt: prompt,
+          understoodIntent: parsed.understoodIntent || 'Processed user instruction with Gemini AI',
+          steps: mappedSteps,
+          needsClarification: Boolean(parsed.needsClarification),
+          clarificationQuestion: parsed.clarificationQuestion || undefined,
+          clarificationOptions: parsed.clarificationOptions || undefined,
+        };
+      }
+    } catch (err: any) {
+      onLogEntry?.({
+        id: `intent_fallback_${Date.now()}`,
+        timestamp: getMechanicalTimestamp(),
+        level: 'WARN',
+        message: `Gemini AI backend notice (${err.message || 'offline'}). Switched seamlessly to built-in deterministic intent engine.`,
+      });
+    }
+  }
+
+  // Graceful zero-failure fallback to local engine
+  return parseWorkflowInstruction(prompt, uploadedFiles);
 }
 
 /**

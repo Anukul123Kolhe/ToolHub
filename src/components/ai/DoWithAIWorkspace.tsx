@@ -27,11 +27,10 @@ import {
   ChevronDown,
   ChevronUp,
   RotateCcw,
-  Eye,
-  Sliders,
 } from 'lucide-react';
 import {
   parseWorkflowInstruction,
+  parseWorkflowInstructionWithAI,
   executeWorkflowPlan,
   ExecutionPlan,
   ExecutionStep,
@@ -53,8 +52,9 @@ export const DoWithAIWorkspace: React.FC<DoWithAIWorkspaceProps> = ({ isModal = 
   const [isListening, setIsListening] = useState<boolean>(false);
   const [recognitionAvailable, setRecognitionAvailable] = useState<boolean>(false);
 
-  // Execution state
+  // Execution & Understanding state
   const [currentPlan, setCurrentPlan] = useState<ExecutionPlan | null>(null);
+  const [isAnalyzingIntent, setIsAnalyzingIntent] = useState<boolean>(false);
   const [isExecuting, setIsExecuting] = useState<boolean>(false);
   const [executionSteps, setExecutionSteps] = useState<ExecutionStep[]>([]);
   const [finalFiles, setFinalFiles] = useState<ProcessedFile[]>([]);
@@ -147,6 +147,7 @@ export const DoWithAIWorkspace: React.FC<DoWithAIWorkspaceProps> = ({ isModal = 
     setTextOutput(null);
     setErrorMessage(null);
     setMechanicalLogs([]);
+    setIsAnalyzingIntent(false);
     setIsExecuting(false);
     setShowMechanicalDetails(false);
   };
@@ -184,6 +185,7 @@ export const DoWithAIWorkspace: React.FC<DoWithAIWorkspaceProps> = ({ isModal = 
     setCurrentPlan(null);
     setErrorMessage(null);
     setInstruction('');
+    setIsAnalyzingIntent(false);
     setShowMechanicalDetails(false);
   };
 
@@ -213,8 +215,37 @@ export const DoWithAIWorkspace: React.FC<DoWithAIWorkspaceProps> = ({ isModal = 
     setFinalFiles([]);
     setTextOutput(null);
 
-    // 1. Task Understanding
-    const plan = parseWorkflowInstruction(instruction, uploadedFiles);
+    // 1. Task Understanding with Google Gemini AI backend
+    setIsAnalyzingIntent(true);
+    setIsExecuting(false);
+
+    const totalBytes = uploadedFiles.reduce((acc, f) => acc + f.size, 0);
+    const initialLogs: MechanicalLogEntry[] = [
+      {
+        id: `init_${Date.now()}_1`,
+        timestamp: getMechanicalTimestamp(),
+        level: 'INIT',
+        message: `Task instruction received: "${instruction}"`,
+      },
+      {
+        id: `init_${Date.now()}_2`,
+        timestamp: getMechanicalTimestamp(),
+        level: 'INIT',
+        message: `Inspecting ${uploadedFiles.length} file buffer(s) (${formatBytes(totalBytes)}). Requesting Google Gemini AI intent synthesis...`,
+      },
+    ];
+    setMechanicalLogs(initialLogs);
+
+    let plan: ExecutionPlan;
+    try {
+      plan = await parseWorkflowInstructionWithAI(
+        instruction,
+        uploadedFiles,
+        (log) => setMechanicalLogs((prev) => [...prev, log])
+      );
+    } catch {
+      plan = parseWorkflowInstruction(instruction, uploadedFiles);
+    }
 
     if (overrideParams && plan.steps.length > 0) {
       plan.steps[0].parameters = { ...plan.steps[0].parameters, ...overrideParams };
@@ -223,6 +254,7 @@ export const DoWithAIWorkspace: React.FC<DoWithAIWorkspaceProps> = ({ isModal = 
 
     setCurrentPlan(plan);
     setExecutionSteps(plan.steps);
+    setIsAnalyzingIntent(false);
 
     // If clarification needed, pause and display options
     if (plan.needsClarification) {
@@ -236,32 +268,13 @@ export const DoWithAIWorkspace: React.FC<DoWithAIWorkspaceProps> = ({ isModal = 
       return;
     }
 
-    // 2. Execution Pipeline
+    // 2. Observable Transition: AI Understood -> Commencing Action
+    // Smooth micro-delay so the user can visibly absorb what AI understood before tool transcoding begins
+    await new Promise((r) => setTimeout(r, 650));
+
+    // 3. Execution Pipeline
     setIsExecuting(true);
     recordToolUsage('do-with-ai', `Ran AI workflow with ${plan.steps.length} step(s)`);
-
-    const totalBytes = uploadedFiles.reduce((acc, f) => acc + f.size, 0);
-    const initialLogs: MechanicalLogEntry[] = [
-      {
-        id: `init_${Date.now()}_1`,
-        timestamp: getMechanicalTimestamp(),
-        level: 'INIT',
-        message: `Task instruction parsed: "${instruction}"`,
-      },
-      {
-        id: `init_${Date.now()}_2`,
-        timestamp: getMechanicalTimestamp(),
-        level: 'INIT',
-        message: `Input staging buffer: ${uploadedFiles.length} file(s) (${formatBytes(totalBytes)}). Client-side sandbox verified.`,
-      },
-      {
-        id: `init_${Date.now()}_3`,
-        timestamp: getMechanicalTimestamp(),
-        level: 'INIT',
-        message: `Assembled ${plan.steps.length} mechanical operation(s) in sequential execution pipeline.`,
-      },
-    ];
-    setMechanicalLogs(initialLogs);
 
     const result = await executeWorkflowPlan(
       plan,
@@ -331,6 +344,8 @@ export const DoWithAIWorkspace: React.FC<DoWithAIWorkspaceProps> = ({ isModal = 
   const overallProgress =
     executionSteps.length > 0
       ? Math.round(executionSteps.reduce((acc, s) => acc + s.progress, 0) / executionSteps.length)
+      : isAnalyzingIntent
+      ? 15
       : isExecuting
       ? 20
       : 0;
@@ -342,7 +357,10 @@ export const DoWithAIWorkspace: React.FC<DoWithAIWorkspaceProps> = ({ isModal = 
   let animationStatus = 'AI is preparing your files...';
   let animationSubMessage = activeStep?.description || 'Validating staged buffers...';
 
-  if (executionSteps.length > 0 && executionSteps.every((s) => s.status === 'completed')) {
+  if (isAnalyzingIntent) {
+    animationStatus = 'Understanding your request with AI...';
+    animationSubMessage = `Analyzing prompt & inspecting ${uploadedFiles.length} file buffer(s) with Gemini AI`;
+  } else if (executionSteps.length > 0 && executionSteps.every((s) => s.status === 'completed')) {
     animationStatus = 'Task completed successfully!';
     animationSubMessage = 'Your files have been processed and are ready for download.';
   } else if (errorMessage) {
@@ -350,7 +368,7 @@ export const DoWithAIWorkspace: React.FC<DoWithAIWorkspaceProps> = ({ isModal = 
     animationSubMessage = errorMessage;
   } else if (isExecuting) {
     if (overallProgress < 25) {
-      animationStatus = 'Understanding your request & checking files...';
+      animationStatus = 'Executing Understood Plan...';
       animationSubMessage = `Staging ${uploadedFiles.length} file(s) into memory`;
     } else if (overallProgress < 60) {
       animationStatus = `Processing ${activeStep?.toolName || 'files'}...`;
@@ -365,7 +383,11 @@ export const DoWithAIWorkspace: React.FC<DoWithAIWorkspaceProps> = ({ isModal = 
   }
 
   const totalDurationMs = executionSteps.reduce((acc, s) => acc + (s.durationMs || 0), 0);
-  const showAnimationStage = isExecuting || finalFiles.length > 0 || (executionSteps.length > 0 && executionSteps.some(s => s.status !== 'pending'));
+  const showAnimationStage =
+    isAnalyzingIntent ||
+    isExecuting ||
+    finalFiles.length > 0 ||
+    (executionSteps.length > 0 && executionSteps.some((s) => s.status !== 'pending'));
 
   return (
     <div className={`space-y-6 ${isModal ? 'max-w-full' : ''}`}>
@@ -397,6 +419,7 @@ export const DoWithAIWorkspace: React.FC<DoWithAIWorkspaceProps> = ({ isModal = 
       {showAnimationStage && (
         <div className="space-y-4">
           <FileTransformationAnimation
+            isAnalyzing={isAnalyzingIntent}
             isExecuting={isExecuting}
             progress={overallProgress}
             statusMessage={animationStatus}
@@ -427,7 +450,7 @@ export const DoWithAIWorkspace: React.FC<DoWithAIWorkspaceProps> = ({ isModal = 
               {showMechanicalDetails ? <ChevronUp className="w-3.5 h-3.5 ml-1" /> : <ChevronDown className="w-3.5 h-3.5 ml-1" />}
             </button>
 
-            {!isExecuting && finalFiles.length > 0 && (
+            {!isExecuting && !isAnalyzingIntent && finalFiles.length > 0 && (
               <button
                 type="button"
                 onClick={handleReset}
@@ -686,10 +709,15 @@ Examples:
                   variant="primary"
                   size="md"
                   onClick={() => handlePlanAndExecute()}
-                  disabled={isExecuting}
+                  disabled={isExecuting || isAnalyzingIntent}
                   className="w-full justify-center bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 shadow-md shadow-blue-500/25 transition-all text-sm rounded-xl"
                 >
-                  {isExecuting ? (
+                  {isAnalyzingIntent ? (
+                    <>
+                      <RefreshCw className="w-4 h-4 animate-spin mr-2" />
+                      Analyzing Requirements with Gemini AI...
+                    </>
+                  ) : isExecuting ? (
                     <>
                       <RefreshCw className="w-4 h-4 animate-spin mr-2" />
                       Executing Pipeline Operations...

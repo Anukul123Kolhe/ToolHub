@@ -47,4 +47,27 @@ describe('AI File Transformation Architecture & Workflow Integration', () => {
     expect(plan.steps[0].toolId).toBe('pdf-split');
     expect(plan.steps[1].toolId).toBe('pdf-page-numbers');
   });
+
+  it('generates high-clarity understoodIntent summary on execution plan', () => {
+    const file = new File(['dummy'], 'photo.png', { type: 'image/png' });
+    const prompt = 'Compress this image below 100 KB and convert to JPG';
+
+    const plan = parseWorkflowInstruction(prompt, [file]);
+
+    expect(plan.understoodIntent).toBeDefined();
+    expect(plan.understoodIntent!.length).toBeGreaterThan(10);
+  });
+
+  it('runs parseWorkflowInstructionWithAI with zero-failure fallback and intent generation', async () => {
+    const { parseWorkflowInstructionWithAI } = await import('../services/ai/workflowEngine');
+    const file = new File(['content'], 'sample.txt', { type: 'text/plain' });
+    const prompt = 'Clean extra spaces from this file';
+
+    const logs: any[] = [];
+    const plan = await parseWorkflowInstructionWithAI(prompt, [file], (log) => logs.push(log));
+
+    expect(plan.steps.length).toBeGreaterThanOrEqual(1);
+    expect(plan.understoodIntent).toBeDefined();
+    expect(logs.length).toBeGreaterThanOrEqual(1);
+  });
 });
