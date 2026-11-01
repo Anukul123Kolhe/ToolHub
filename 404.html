@@ -1,28 +1,35 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="utf-8">
-    <title>ToolHub - Redirecting...</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ToolHub — Redirecting...</title>
     <script>
       (function() {
         var path = window.location.pathname;
+        var repo = '';
         if (window.location.hostname.endsWith('github.io')) {
-          var repoMatch = path.match(/^(\/[^\/]+)/);
-          var repo = repoMatch ? repoMatch[1] : '';
-          var remaining = path.slice(repo.length);
-          if (remaining.startsWith('/docs')) {
-            // Already inside /docs, let HashRouter handle it
-            window.location.replace(repo + '/docs/#' + remaining.replace(/^\/docs\/?/, '/') + window.location.search + window.location.hash);
+          var segments = path.split('/').filter(Boolean);
+          if (segments.length > 0) {
+            repo = '/' + segments[0] + '/';
+            path = segments.slice(1).join('/');
           } else {
-            window.location.replace(repo + '/docs/#' + remaining + window.location.search + window.location.hash);
+            repo = '/';
           }
         } else {
-          window.location.replace('/#' + path + window.location.search + window.location.hash);
+          repo = '/';
+          path = path.replace(/^\//, '');
         }
+        path = path.replace(/\/+$/, '');
+        var target = window.location.origin + repo + (path ? '#/' + path : '') + window.location.search + window.location.hash;
+        window.location.replace(target);
       })();
     </script>
   </head>
-  <body>
-    <p>Redirecting to <a href="./docs/">ToolHub</a>...</p>
+  <body style="font-family: system-ui, sans-serif; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; background-color: #0B0F17; color: #F8FAFC;">
+    <div style="text-align: center; padding: 20px;">
+      <h2 style="margin-bottom: 8px;">Loading ToolHub...</h2>
+      <p style="color: #94A3B8; font-size: 14px;">Redirecting you to the application...</p>
+    </div>
   </body>
 </html>

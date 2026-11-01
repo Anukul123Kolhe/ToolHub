@@ -1,29 +1,35 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="ToolHub — AI-Powered, Privacy-First, All-in-One Online Utility Platform. Fast, client-side, zero-upload tools." />
-    <title>ToolHub — AI-Powered, Privacy-First Online Utilities</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-    <script type="module" crossorigin src="./assets/index-CdQ5jCGE.js"></script>
-    <link rel="stylesheet" crossorigin href="./assets/index-Bgpq4gjo.css">
-  </head>
-  <body class="bg-[#F8FAFC] text-[#0F172A] dark:bg-[#0B0F17] dark:text-[#F8FAFC] min-h-screen antialiased selection:bg-blue-600 selection:text-white">
-    <div id="root"></div>
+    <title>ToolHub — Redirecting...</title>
     <script>
       (function() {
+        var path = window.location.pathname;
+        var repo = '';
         if (window.location.hostname.endsWith('github.io')) {
-          var isDevHtml = document.querySelector('script[src*="main.tsx"]');
-          if (isDevHtml) {
-            var base = window.location.pathname.replace(/\/+$/, '');
-            window.location.replace(base + '/docs/' + window.location.search + window.location.hash);
+          var segments = path.split('/').filter(Boolean);
+          if (segments.length > 0) {
+            repo = '/' + segments[0] + '/';
+            path = segments.slice(1).join('/');
+          } else {
+            repo = '/';
           }
+        } else {
+          repo = '/';
+          path = path.replace(/^\//, '');
         }
+        path = path.replace(/\/+$/, '');
+        var target = window.location.origin + repo + (path ? '#/' + path : '') + window.location.search + window.location.hash;
+        window.location.replace(target);
       })();
     </script>
+  </head>
+  <body style="font-family: system-ui, sans-serif; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; background-color: #0B0F17; color: #F8FAFC;">
+    <div style="text-align: center; padding: 20px;">
+      <h2 style="margin-bottom: 8px;">Loading ToolHub...</h2>
+      <p style="color: #94A3B8; font-size: 14px;">Redirecting you to the application...</p>
+    </div>
   </body>
 </html>
