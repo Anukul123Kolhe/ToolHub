@@ -24,11 +24,11 @@ import { CATEGORIES } from '../config/categories';
 import { getPopularTools } from '../services/search/searchService';
 import { useStorage } from '../context/StorageContext';
 import { ToolCategory } from '../types/tool';
-import { Badge } from '../components/common/Badge';
 
 interface HomePageProps {
   onOpenSearch: () => void;
   onOpenAIAssistant?: () => void;
+  onOpenDoWithAI?: () => void;
 }
 
 const CATEGORY_ICONS: Record<ToolCategory, React.ComponentType<{ className?: string }>> = {
@@ -45,13 +45,17 @@ const CATEGORY_ICONS: Record<ToolCategory, React.ComponentType<{ className?: str
   advanced: Sparkles,
 };
 
-export const HomePage: React.FC<HomePageProps> = ({ onOpenSearch, onOpenAIAssistant }) => {
+export const HomePage: React.FC<HomePageProps> = ({
+  onOpenSearch,
+  onOpenAIAssistant,
+  onOpenDoWithAI,
+}) => {
   const navigate = useNavigate();
-  const { isFavorite, toggleFavorite, recentTools } = useStorage();
+  const { isFavorite, toggleFavorite } = useStorage();
   const popularTools = getPopularTools();
 
   const quickActionPills = [
-    { label: '✨ Do With AI', path: '/do-with-ai' },
+    { label: '✨ Do With AI', action: onOpenDoWithAI, path: '/do-with-ai' },
     { label: 'Compress photo < 50KB', path: '/tool/image-exact-size' },
     { label: 'Merge assignment PDFs', path: '/tool/pdf-merge' },
     { label: 'Calculate SGPA / CGPA', path: '/tool/sgpa-calculator' },
@@ -116,7 +120,13 @@ export const HomePage: React.FC<HomePageProps> = ({ onOpenSearch, onOpenAIAssist
               <button
                 key={idx}
                 type="button"
-                onClick={() => navigate(pill.path)}
+                onClick={() => {
+                  if (pill.action) {
+                    pill.action();
+                  } else {
+                    navigate(pill.path);
+                  }
+                }}
                 className={`px-3.5 py-1.5 rounded-full font-semibold border shadow-xs transition-all ${
                   pill.path === '/do-with-ai'
                     ? 'bg-blue-600 hover:bg-blue-700 text-white border-blue-600 font-bold shadow-blue-500/25'
@@ -147,19 +157,20 @@ export const HomePage: React.FC<HomePageProps> = ({ onOpenSearch, onOpenAIAssist
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-3 flex-shrink-0">
-              <Link
-                to="/do-with-ai"
-                className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-white text-blue-700 hover:bg-blue-50 font-bold text-sm shadow-lg transition-all active:scale-95"
+              <button
+                type="button"
+                onClick={onOpenDoWithAI || (() => navigate('/do-with-ai'))}
+                className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-white text-blue-700 hover:bg-blue-50 font-bold text-sm shadow-lg transition-all active:scale-95 cursor-pointer"
               >
                 <Sparkles className="w-4 h-4 text-blue-600" />
-                <span>Try Do With AI</span>
+                <span>Open Do With AI</span>
                 <ArrowRight className="w-4 h-4" />
-              </Link>
+              </button>
               {onOpenAIAssistant && (
                 <button
                   type="button"
                   onClick={onOpenAIAssistant}
-                  className="inline-flex items-center gap-2 px-4 py-3 rounded-xl bg-white/10 hover:bg-white/20 text-white font-semibold text-sm transition-all border border-white/20"
+                  className="inline-flex items-center gap-2 px-4 py-3 rounded-xl bg-white/10 hover:bg-white/20 text-white font-semibold text-sm transition-all border border-white/20 cursor-pointer"
                 >
                   <span>Chat Assistant</span>
                 </button>

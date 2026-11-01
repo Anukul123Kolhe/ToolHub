@@ -20,9 +20,14 @@ import { useStorage } from '../../context/StorageContext';
 interface HeaderProps {
   onOpenSearch: () => void;
   onOpenAIAssistant: () => void;
+  onOpenDoWithAI: () => void;
 }
 
-export const Header: React.FC<HeaderProps> = ({ onOpenSearch, onOpenAIAssistant }) => {
+export const Header: React.FC<HeaderProps> = ({
+  onOpenSearch,
+  onOpenAIAssistant,
+  onOpenDoWithAI,
+}) => {
   const { theme, toggleTheme } = useTheme();
   const { favorites } = useStorage();
   const location = useLocation();
@@ -78,19 +83,22 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSearch, onOpenAIAssistant 
             All Tools
           </Link>
 
-          {/* Do With AI Main Navigation Link */}
-          <Link
-            to="/do-with-ai"
+          {/* Do With AI Popup Modal Trigger */}
+          <button
+            type="button"
+            onClick={onOpenDoWithAI}
             className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${
               isActive('/do-with-ai')
                 ? 'bg-blue-600 text-white shadow-sm shadow-blue-500/25 border border-blue-600'
                 : 'text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/50 border border-blue-200 dark:border-blue-800/80 bg-blue-50/50 dark:bg-blue-950/20'
             }`}
+            title="Open Do With AI Workspace"
           >
             <Sparkles className="w-3.5 h-3.5 text-blue-500 dark:text-blue-300 animate-pulse" />
             <span>Do With AI</span>
-          </Link>
+          </button>
 
+          {/* AI Assistant Modal Trigger */}
           <button
             type="button"
             onClick={onOpenAIAssistant}
@@ -176,14 +184,17 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSearch, onOpenAIAssistant 
           >
             All 400+ Tools
           </Link>
-          <Link
-            to="/do-with-ai"
-            onClick={() => setMobileMenuOpen(false)}
-            className="flex items-center gap-2 px-3 py-2 text-sm font-bold rounded-lg text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-950/40"
+          <button
+            type="button"
+            onClick={() => {
+              setMobileMenuOpen(false);
+              onOpenDoWithAI();
+            }}
+            className="w-full flex items-center gap-2 px-3 py-2 text-sm font-bold rounded-lg text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-950/40 text-left"
           >
             <Sparkles className="w-4 h-4 text-blue-600" />
             Do With AI (File Tasks)
-          </Link>
+          </button>
           <button
             type="button"
             onClick={() => {

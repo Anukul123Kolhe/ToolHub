@@ -18,10 +18,13 @@ import { PrivacyPage } from './pages/PrivacyPage';
 import { AboutPage } from './pages/AboutPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { AIAssistantModal } from './components/ai/AIAssistantModal';
+import { DoWithAIModal } from './components/ai/DoWithAIModal';
+import { Sparkles } from 'lucide-react';
 
 export const AppContent: React.FC = () => {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isAIAssistantOpen, setIsAIAssistantOpen] = useState(false);
+  const [isDoWithAIOpen, setIsDoWithAIOpen] = useState(false);
 
   // Global Cmd+K / Ctrl+K listener
   useEffect(() => {
@@ -40,6 +43,7 @@ export const AppContent: React.FC = () => {
       <Header
         onOpenSearch={() => setIsSearchOpen(true)}
         onOpenAIAssistant={() => setIsAIAssistantOpen(true)}
+        onOpenDoWithAI={() => setIsDoWithAIOpen(true)}
       />
 
       <main className="flex-grow">
@@ -50,6 +54,7 @@ export const AppContent: React.FC = () => {
               <HomePage
                 onOpenSearch={() => setIsSearchOpen(true)}
                 onOpenAIAssistant={() => setIsAIAssistantOpen(true)}
+                onOpenDoWithAI={() => setIsDoWithAIOpen(true)}
               />
             }
           />
@@ -67,6 +72,19 @@ export const AppContent: React.FC = () => {
         </Routes>
       </main>
 
+      {/* Floating "Do With AI" Quick Trigger Button */}
+      <div className="fixed bottom-5 right-5 z-40 flex items-center gap-2">
+        <button
+          type="button"
+          onClick={() => setIsDoWithAIOpen(true)}
+          className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 hover:scale-105 active:scale-95 transition-all border border-blue-500/40"
+          title="Open Do With AI popup workspace"
+        >
+          <Sparkles className="w-4 h-4 text-yellow-300 animate-pulse" />
+          <span>Do With AI</span>
+        </button>
+      </div>
+
       <Footer />
 
       <GlobalSearchModal
@@ -77,6 +95,11 @@ export const AppContent: React.FC = () => {
       <AIAssistantModal
         isOpen={isAIAssistantOpen}
         onClose={() => setIsAIAssistantOpen(false)}
+      />
+
+      <DoWithAIModal
+        isOpen={isDoWithAIOpen}
+        onClose={() => setIsDoWithAIOpen(false)}
       />
     </div>
   );
