@@ -557,8 +557,10 @@ ${fileSummary || 'No files uploaded.'}`;
         apiKey,
         DEFAULT_GEMINI_MODEL,
         userContent,
-        [{ role: 'user', text: systemInstruction }],
-        false
+        [],
+        false,
+        systemInstruction,
+        'application/json'
       );
 
       const cleanJson = responseText.replace(/```(?:json)?/gi, '').replace(/```/g, '').trim();

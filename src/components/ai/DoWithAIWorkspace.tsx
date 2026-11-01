@@ -39,6 +39,7 @@ import {
 } from '../../services/ai/workflowEngine';
 import { ProcessedFile } from '../../services/ai/toolRegistry';
 import { FileTransformationAnimation } from './animation/FileTransformationAnimation';
+import { InPageFilePreviewModal } from './InPageFilePreviewModal';
 
 interface DoWithAIWorkspaceProps {
   isModal?: boolean;
@@ -270,7 +271,7 @@ export const DoWithAIWorkspace: React.FC<DoWithAIWorkspaceProps> = ({ isModal = 
 
     // 2. Observable Transition: AI Understood -> Commencing Action
     // Smooth micro-delay so the user can visibly absorb what AI understood before tool transcoding begins
-    await new Promise((r) => setTimeout(r, 650));
+    await new Promise((r) => setTimeout(r, 1200));
 
     // 3. Execution Pipeline
     setIsExecuting(true);
@@ -360,6 +361,9 @@ export const DoWithAIWorkspace: React.FC<DoWithAIWorkspaceProps> = ({ isModal = 
   if (isAnalyzingIntent) {
     animationStatus = 'Understanding your request with AI...';
     animationSubMessage = `Analyzing prompt & inspecting ${uploadedFiles.length} file buffer(s) with Gemini AI`;
+  } else if (currentPlan?.understoodIntent && !isExecuting && !errorMessage && finalFiles.length === 0) {
+    animationStatus = 'AI Understood: ' + currentPlan.understoodIntent;
+    animationSubMessage = 'Synthesized execution plan. Commencing mechanical operations...';
   } else if (executionSteps.length > 0 && executionSteps.every((s) => s.status === 'completed')) {
     animationStatus = 'Task completed successfully!';
     animationSubMessage = 'Your files have been processed and are ready for download.';
@@ -1061,65 +1065,12 @@ Examples:
         </div>
       )}
 
-      {/* Output Preview Modal */}
+      {/* Output In-Page Preview Modal (Zero External Redirects) */}
       {previewingFile && (
-        <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="relative w-full max-w-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl overflow-hidden p-5 space-y-4">
-            <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
-              <div className="min-w-0">
-                <h3 className="font-bold text-sm text-slate-900 dark:text-white truncate">
-                  {previewingFile.name}
-                </h3>
-                <p className="text-[11px] text-slate-500">
-                  {formatBytes(previewingFile.size)} • {previewingFile.type}
-                </p>
-              </div>
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="primary"
-                  size="sm"
-                  onClick={() => downloadBlob(previewingFile.blob, previewingFile.name)}
-                  className="text-xs"
-                >
-                  <Download className="w-3.5 h-3.5 mr-1" />
-                  Download
-                </Button>
-                <button
-                  type="button"
-                  onClick={() => setPreviewingFile(null)}
-                  className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
-
-            <div className="max-h-[65vh] overflow-auto flex items-center justify-center bg-slate-100 dark:bg-slate-950 rounded-xl p-2">
-              {previewingFile.type.startsWith('image/') && previewingFile.url ? (
-                <img
-                  src={previewingFile.url}
-                  alt={previewingFile.name}
-                  className="max-h-[60vh] max-w-full object-contain rounded-lg"
-                />
-              ) : (
-                <div className="p-8 text-center text-slate-600 dark:text-slate-300 space-y-2">
-                  <FileText className="w-12 h-12 mx-auto text-blue-500" />
-                  <p className="text-xs font-semibold">{previewingFile.name}</p>
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    onClick={() => {
-                      if (previewingFile.url) window.open(previewingFile.url, '_blank');
-                    }}
-                    className="text-xs"
-                  >
-                    Open in External Viewer
-                  </Button>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
+        <InPageFilePreviewModal
+          file={previewingFile}
+          onClose={() => setPreviewingFile(null)}
+        />
       )}
     </div>
   );

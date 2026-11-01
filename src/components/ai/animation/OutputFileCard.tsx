@@ -130,6 +130,20 @@ export const OutputFileCard: React.FC<OutputFileCardProps> = ({
               <span className="text-emerald-600 dark:text-emerald-400 font-bold">100% Ready</span>
             </div>
           </div>
+
+          {/* Quick In-Page Preview Button */}
+          {onPreview && primaryOutput && (
+            <div className="pt-2 mt-1 border-t border-slate-100 dark:border-slate-800">
+              <button
+                type="button"
+                onClick={() => onPreview(primaryOutput)}
+                className="w-full py-1.5 px-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/60 dark:hover:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800 text-[11px] font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+              >
+                <Eye className="w-3.5 h-3.5" />
+                <span>Preview In-Page</span>
+              </button>
+            </div>
+          )}
         </div>
       </div>
     );

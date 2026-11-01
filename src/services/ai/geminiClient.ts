@@ -262,7 +262,9 @@ export async function executeGeminiRequest(
   model: string,
   userMessage: string,
   conversationHistory: { role: 'user' | 'model'; text: string }[] = [],
-  includeThinking: boolean = true
+  includeThinking: boolean = true,
+  customSystemInstruction?: string,
+  responseMimeType?: string
 ): Promise<string> {
   const cleanModel = normalizeModelId(model) || DEFAULT_GEMINI_MODEL;
   const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${cleanModel}:generateContent?key=${apiKey.trim()}`;
@@ -279,9 +281,13 @@ export async function executeGeminiRequest(
   ];
 
   const generationConfig: Record<string, any> = {
-    temperature: 0.2,
-    maxOutputTokens: 1000,
+    temperature: 0.1,
+    maxOutputTokens: 1200,
   };
+
+  if (responseMimeType) {
+    generationConfig.responseMimeType = responseMimeType;
+  }
 
   // Only pass thinkingBudget if model is 2.5 flash or thinking model AND includeThinking is true
   if (
@@ -295,7 +301,7 @@ export async function executeGeminiRequest(
 
   const body = {
     systemInstruction: {
-      parts: [{ text: GEMINI_SYSTEM_INSTRUCTION }],
+      parts: [{ text: customSystemInstruction || GEMINI_SYSTEM_INSTRUCTION }],
     },
     contents,
     generationConfig,
@@ -328,7 +334,15 @@ export async function executeGeminiRequest(
           errorMsg.includes('INVALID_ARGUMENT') ||
           response.status === 400)
       ) {
-        return await executeGeminiRequest(apiKey, model, userMessage, conversationHistory, false);
+        return await executeGeminiRequest(
+          apiKey,
+          model,
+          userMessage,
+          conversationHistory,
+          false,
+          customSystemInstruction,
+          responseMimeType
+        );
       }
 
       throw new Error(errorMsg);

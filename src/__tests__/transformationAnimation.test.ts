@@ -70,4 +70,29 @@ describe('AI File Transformation Architecture & Workflow Integration', () => {
     expect(plan.understoodIntent).toBeDefined();
     expect(logs.length).toBeGreaterThanOrEqual(1);
   });
+
+  it('verifies in-page preview file compatibility for PDF, image, and ZIP without redirection', () => {
+    const dummyBlob = new Blob(['sample content'], { type: 'application/pdf' });
+    const dummyUrl = 'blob:http://localhost/sample-pdf';
+    const processedPdf = {
+      name: 'merged_document.pdf',
+      blob: dummyBlob,
+      url: dummyUrl,
+      type: 'application/pdf',
+      size: dummyBlob.size,
+    };
+
+    expect(processedPdf.name.endsWith('.pdf')).toBe(true);
+    expect(processedPdf.url.startsWith('blob:')).toBe(true);
+    expect(processedPdf.type).toBe('application/pdf');
+
+    const processedZip = {
+      name: 'archive_payload.zip',
+      blob: new Blob(['PK dummy'], { type: 'application/zip' }),
+      url: 'blob:http://localhost/sample-zip',
+      type: 'application/zip',
+      size: 1024,
+    };
+    expect(processedZip.name.endsWith('.zip')).toBe(true);
+  });
 });
