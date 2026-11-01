@@ -99,4 +99,44 @@ describe('AI Task Understanding & Workflow Engine', () => {
     expect(plan.steps[0].toolId).toBe('pdf-split');
     expect(plan.steps[0].parameters.pageRange).toContain('2');
   });
+
+  it('populates mechanical metadata (phaseName, engineName, subOperations) on planned steps', () => {
+    const dummyImage = new File(['dummy'], 'photo.png', { type: 'image/png' });
+    const prompt = 'Compress these images below 100 KB, convert them into JPG format, and put all into one ZIP file.';
+
+    const plan = parseWorkflowInstruction(prompt, [dummyImage]);
+
+    expect(plan.steps.length).toBe(3);
+    plan.steps.forEach((step) => {
+      expect(step.phaseName).toBeDefined();
+      expect(step.engineName).toBeDefined();
+      expect(step.subOperations).toBeDefined();
+      expect(step.subOperations!.length).toBeGreaterThanOrEqual(2);
+    });
+  });
+
+  it('executes workflow plan mechanically with log streaming and duration metrics', async () => {
+    const textFile = new File(['hello   world  \n\n  test  '], 'sample.txt', { type: 'text/plain' });
+    const prompt = 'Clean extra spaces from this text file';
+
+    const plan = parseWorkflowInstruction(prompt, [textFile]);
+    expect(plan.steps.length).toBe(1);
+
+    const logs: any[] = [];
+    const result = await (await import('../services/ai/workflowEngine')).executeWorkflowPlan(
+      plan,
+      [textFile],
+      () => {},
+      () => {},
+      (logEntry) => {
+        logs.push(logEntry);
+      }
+    );
+
+    expect(result.success).toBe(true);
+    expect(logs.length).toBeGreaterThan(0);
+    expect(logs.some((l) => l.level === 'INIT' || l.level === 'EXEC')).toBe(true);
+    expect(logs.some((l) => l.level === 'SUCCESS')).toBe(true);
+    expect(plan.steps[0].durationMs).toBeGreaterThanOrEqual(0);
+  });
 });
