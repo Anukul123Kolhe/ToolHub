@@ -51,13 +51,13 @@ export const HomePage: React.FC<HomePageProps> = ({ onOpenSearch, onOpenAIAssist
   const popularTools = getPopularTools();
 
   const quickActionPills = [
+    { label: '✨ Do With AI', path: '/do-with-ai' },
     { label: 'Compress photo < 50KB', path: '/tool/image-exact-size' },
     { label: 'Merge assignment PDFs', path: '/tool/pdf-merge' },
     { label: 'Calculate SGPA / CGPA', path: '/tool/sgpa-calculator' },
     { label: 'Format & validate JSON', path: '/tool/dev-json-formatter' },
     { label: 'Wi-Fi QR Code', path: '/tool/qr-wifi' },
     { label: 'Safe attendance bunks', path: '/tool/attendance-calculator' },
-    { label: 'Extract text via OCR', path: '/tool/adv-ocr-image' },
   ];
 
   return (
@@ -73,7 +73,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onOpenSearch, onOpenAIAssist
           <span>Unified Online Utility Platform • 400+ Working Tools</span>
         </div>
 
-        {/* Main Headline - Deep dark slate #0F172A */}
+        {/* Main Headline */}
         <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-[#0F172A] dark:text-white tracking-tight leading-[1.12]">
           Every online tool you need. <br />
           <span className="text-blue-600 dark:text-blue-400">
@@ -117,7 +117,11 @@ export const HomePage: React.FC<HomePageProps> = ({ onOpenSearch, onOpenAIAssist
                 key={idx}
                 type="button"
                 onClick={() => navigate(pill.path)}
-                className="px-3.5 py-1.5 rounded-full bg-white dark:bg-slate-900 hover:bg-blue-50 dark:hover:bg-blue-950/40 hover:text-blue-600 dark:hover:text-blue-300 hover:border-blue-400 text-slate-700 dark:text-slate-200 font-semibold border border-slate-300 dark:border-slate-700 shadow-xs transition-all"
+                className={`px-3.5 py-1.5 rounded-full font-semibold border shadow-xs transition-all ${
+                  pill.path === '/do-with-ai'
+                    ? 'bg-blue-600 hover:bg-blue-700 text-white border-blue-600 font-bold shadow-blue-500/25'
+                    : 'bg-white dark:bg-slate-900 hover:bg-blue-50 dark:hover:bg-blue-950/40 hover:text-blue-600 dark:hover:text-blue-300 hover:border-blue-400 text-slate-700 dark:text-slate-200 border-slate-300 dark:border-slate-700'
+                }`}
               >
                 {pill.label}
               </button>
@@ -126,30 +130,41 @@ export const HomePage: React.FC<HomePageProps> = ({ onOpenSearch, onOpenAIAssist
         </div>
       </section>
 
-      {/* AI Assistant Banner */}
+      {/* Do With AI Feature Spotlight Banner */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-blue-700 via-indigo-700 to-slate-900 p-8 text-white shadow-xl shadow-blue-900/20 border border-blue-500/20">
           <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
             <div className="space-y-2 max-w-2xl">
               <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/20 text-white text-xs font-bold backdrop-blur-sm border border-white/20">
-                <Sparkles className="w-3.5 h-3.5" />
-                <span>Feature Spotlight</span>
+                <Sparkles className="w-3.5 h-3.5 text-yellow-300 animate-pulse" />
+                <span>New Major Feature</span>
               </div>
               <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
-                AI Task Assistant & Tool Orchestrator
+                Do With AI — Intelligent File Processing Workspace
               </h2>
               <p className="text-sm text-blue-100 leading-relaxed font-normal">
-                Tell the assistant what you need in plain English. Attach your files and let ToolHub parameterize and execute the right browser tools for you safely and sequentially.
+                Upload your photos, PDFs, or documents. Tell AI what you need in plain English (e.g., <em>"Compress below 100 KB, convert to JPG, and put in a ZIP"</em>). Watch it execute the actual operations step-by-step 100% locally in your browser.
               </p>
             </div>
-            <button
-              type="button"
-              onClick={onOpenAIAssistant}
-              className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-white text-blue-700 hover:bg-blue-50 font-bold text-sm shadow-lg transition-all active:scale-95 flex-shrink-0"
-            >
-              <span>Launch AI Assistant</span>
-              <ArrowRight className="w-4 h-4" />
-            </button>
+            <div className="flex flex-wrap items-center gap-3 flex-shrink-0">
+              <Link
+                to="/do-with-ai"
+                className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-white text-blue-700 hover:bg-blue-50 font-bold text-sm shadow-lg transition-all active:scale-95"
+              >
+                <Sparkles className="w-4 h-4 text-blue-600" />
+                <span>Try Do With AI</span>
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+              {onOpenAIAssistant && (
+                <button
+                  type="button"
+                  onClick={onOpenAIAssistant}
+                  className="inline-flex items-center gap-2 px-4 py-3 rounded-xl bg-white/10 hover:bg-white/20 text-white font-semibold text-sm transition-all border border-white/20"
+                >
+                  <span>Chat Assistant</span>
+                </button>
+              )}
+            </div>
           </div>
         </div>
       </section>
@@ -218,48 +233,44 @@ export const HomePage: React.FC<HomePageProps> = ({ onOpenSearch, onOpenAIAssist
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {popularTools.map((tool) => {
             const fav = isFavorite(tool.id);
-            const cat = CATEGORIES[tool.category];
+            const Icon = CATEGORY_ICONS[tool.category] || Sparkles;
 
             return (
               <div
                 key={tool.id}
                 onClick={() => navigate(tool.path)}
-                className="group relative p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-blue-500 dark:hover:border-blue-400 shadow-sm hover:shadow-lg hover:shadow-blue-500/10 hover:-translate-y-0.5 cursor-pointer transition-all flex flex-col justify-between"
+                className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-blue-500 dark:hover:border-blue-400 shadow-xs hover:shadow-md transition-all cursor-pointer group flex flex-col justify-between"
               >
-                <div>
-                  <div className="flex items-start justify-between gap-2 mb-2">
-                    <Badge variant="neutral" size="sm">
-                      {cat.name}
-                    </Badge>
+                <div className="space-y-3">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 flex items-center justify-center group-hover:scale-105 transition-transform">
+                      <Icon className="w-5 h-5" />
+                    </div>
                     <button
                       type="button"
                       onClick={(e) => {
                         e.stopPropagation();
                         toggleFavorite(tool.id);
                       }}
-                      className={`p-1 rounded-md transition-colors ${
-                        fav
-                          ? 'text-amber-500'
-                          : 'text-slate-300 dark:text-slate-600 hover:text-slate-500'
-                      }`}
-                      title={fav ? 'Remove from bookmarks' : 'Add to bookmarks'}
+                      className="p-1.5 rounded-lg text-slate-400 hover:text-blue-600 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
                     >
-                      <Bookmark className={`w-4 h-4 ${fav ? 'fill-current' : ''}`} />
+                      <Bookmark className={`w-4 h-4 ${fav ? 'fill-blue-600 text-blue-600' : ''}`} />
                     </button>
                   </div>
-
-                  <h3 className="font-bold text-sm text-[#0F172A] dark:text-slate-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                    {tool.name}
-                  </h3>
-                  <p className="text-xs text-slate-600 dark:text-slate-400 mt-1 line-clamp-2 leading-relaxed font-normal">
-                    {tool.shortDescription || tool.description}
-                  </p>
+                  <div>
+                    <h3 className="font-bold text-sm text-[#0F172A] dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                      {tool.name}
+                    </h3>
+                    <p className="text-xs text-slate-600 dark:text-slate-400 mt-1 line-clamp-2 leading-relaxed">
+                      {tool.shortDescription || tool.description}
+                    </p>
+                  </div>
                 </div>
-
-                <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-[11px] text-slate-400">
-                  <span className="font-medium text-slate-500">In-Browser</span>
-                  <span className="font-bold text-blue-600 dark:text-blue-400 group-hover:translate-x-0.5 transition-transform flex items-center gap-0.5">
-                    Use Tool →
+                <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-[11px] text-slate-400">
+                  <span className="capitalize">{tool.category}</span>
+                  <span className="text-blue-600 dark:text-blue-400 font-bold group-hover:translate-x-0.5 transition-transform flex items-center gap-0.5">
+                    Launch
+                    <ArrowRight className="w-3.5 h-3.5" />
                   </span>
                 </div>
               </div>
@@ -268,39 +279,42 @@ export const HomePage: React.FC<HomePageProps> = ({ onOpenSearch, onOpenAIAssist
         </div>
       </section>
 
-      {/* Recent Tools (If any) */}
-      {recentTools.length > 0 && (
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg font-black text-[#0F172A] dark:text-white tracking-tight">
-              Recently Used
-            </h2>
-            <Link
-              to="/history"
-              className="text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline"
-            >
-              View Full History
-            </Link>
-          </div>
+      {/* Explore By Suite Categories */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+        <div>
+          <h2 className="text-2xl font-black text-[#0F172A] dark:text-white tracking-tight">
+            Browse By Category
+          </h2>
+          <p className="text-xs text-slate-600 dark:text-slate-400 mt-1 font-medium">
+            Find the right tools organized across 11 professional suites
+          </p>
+        </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-            {recentTools.slice(0, 6).map((tool) => (
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+          {Object.values(CATEGORIES).map((cat) => {
+            const Icon = CATEGORY_ICONS[cat.id] || Sparkles;
+            return (
               <div
-                key={tool.id}
-                onClick={() => navigate(tool.path)}
-                className="p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-blue-500 cursor-pointer shadow-sm hover:shadow-md hover:shadow-blue-500/15 transition-all"
+                key={cat.id}
+                onClick={() => navigate(`/category/${cat.id}`)}
+                className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-blue-500 dark:hover:border-blue-400 shadow-xs hover:shadow-md transition-all cursor-pointer group"
               >
-                <p className="text-xs font-bold text-[#0F172A] dark:text-slate-200 truncate">
-                  {tool.name}
-                </p>
-                <p className="text-[10px] text-slate-500 truncate mt-0.5 font-medium">
-                  {CATEGORIES[tool.category].name}
+                <div className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 group-hover:bg-blue-600 group-hover:text-white flex items-center justify-center transition-all">
+                  <Icon className="w-5 h-5" />
+                </div>
+                <h3 className="font-bold text-sm text-[#0F172A] dark:text-white mt-3 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                  {cat.name}
+                </h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 line-clamp-2">
+                  {cat.description}
                 </p>
               </div>
-            ))}
-          </div>
-        </section>
-      )}
+            );
+          })}
+        </div>
+      </section>
     </div>
   );
 };
+
+export default HomePage;

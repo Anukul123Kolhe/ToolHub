@@ -12,6 +12,7 @@ import {
   X,
   ShieldCheck,
   Settings,
+  Bot,
 } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { useStorage } from '../../context/StorageContext';
@@ -53,11 +54,11 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSearch, onOpenAIAssistant 
         <button
           type="button"
           onClick={onOpenSearch}
-          className="hidden md:flex items-center justify-between w-72 lg:w-96 px-3.5 py-2 text-xs text-slate-500 dark:text-slate-400 bg-white/70 dark:bg-slate-900/70 hover:bg-white dark:hover:bg-slate-900 hover:border-blue-500 dark:hover:border-blue-400 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 rounded-xl transition-all shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="hidden md:flex items-center justify-between w-64 lg:w-80 px-3.5 py-2 text-xs text-slate-500 dark:text-slate-400 bg-white/70 dark:bg-slate-900/70 hover:bg-white dark:hover:bg-slate-900 hover:border-blue-500 dark:hover:border-blue-400 border border-slate-300 dark:border-slate-700 rounded-xl transition-all shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
           <div className="flex items-center gap-2">
             <Search className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-            <span>Search 400+ tools or describe your task...</span>
+            <span>Search 400+ tools or task...</span>
           </div>
           <kbd className="inline-flex items-center gap-0.5 font-mono text-[10px] bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-1.5 py-0.5 rounded shadow-xs text-slate-600 dark:text-slate-300">
             <span className="text-xs">⌘</span>K
@@ -77,13 +78,26 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSearch, onOpenAIAssistant 
             All Tools
           </Link>
 
+          {/* Do With AI Main Navigation Link */}
+          <Link
+            to="/do-with-ai"
+            className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${
+              isActive('/do-with-ai')
+                ? 'bg-blue-600 text-white shadow-sm shadow-blue-500/25 border border-blue-600'
+                : 'text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/50 border border-blue-200 dark:border-blue-800/80 bg-blue-50/50 dark:bg-blue-950/20'
+            }`}
+          >
+            <Sparkles className="w-3.5 h-3.5 text-blue-500 dark:text-blue-300 animate-pulse" />
+            <span>Do With AI</span>
+          </Link>
+
           <button
             type="button"
             onClick={onOpenAIAssistant}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg transition-all bg-blue-600 hover:bg-blue-700 text-white font-bold shadow-sm shadow-blue-500/25 hover:scale-[1.02] border border-blue-600"
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg transition-all text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700"
           >
-            <Sparkles className="w-3.5 h-3.5 text-white animate-pulse" />
-            <span>AI Assistant</span>
+            <Bot className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
+            <span>Assistant</span>
           </button>
 
           <Link
@@ -162,16 +176,24 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSearch, onOpenAIAssistant 
           >
             All 400+ Tools
           </Link>
+          <Link
+            to="/do-with-ai"
+            onClick={() => setMobileMenuOpen(false)}
+            className="flex items-center gap-2 px-3 py-2 text-sm font-bold rounded-lg text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-950/40"
+          >
+            <Sparkles className="w-4 h-4 text-blue-600" />
+            Do With AI (File Tasks)
+          </Link>
           <button
             type="button"
             onClick={() => {
               setMobileMenuOpen(false);
               onOpenAIAssistant();
             }}
-            className="w-full flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 text-left"
+            className="w-full flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-900 text-left"
           >
-            <Sparkles className="w-4 h-4 text-emerald-500" />
-            AI Task Assistant
+            <Bot className="w-4 h-4 text-slate-500" />
+            AI Assistant
           </button>
           <Link
             to="/favorites"
@@ -192,7 +214,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSearch, onOpenAIAssistant 
             onClick={() => setMobileMenuOpen(false)}
             className="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-900"
           >
-            <Settings className="w-4 h-4 text-emerald-500" />
+            <Settings className="w-4 h-4 text-blue-500" />
             Settings
           </Link>
           <Link

@@ -11,6 +11,7 @@ import { ToolsCatalogPage } from './pages/ToolsCatalogPage';
 import { CategoryPage } from './pages/CategoryPage';
 import { ToolWorkspacePage } from './pages/ToolWorkspacePage';
 import { AIAssistantPage } from './pages/AIAssistantPage';
+import { DoWithAIPage } from './pages/DoWithAIPage';
 import { FavoritesPage } from './pages/FavoritesPage';
 import { HistoryPage } from './pages/HistoryPage';
 import { PrivacyPage } from './pages/PrivacyPage';
@@ -53,6 +54,7 @@ export const AppContent: React.FC = () => {
             }
           />
           <Route path="/tools" element={<ToolsCatalogPage />} />
+          <Route path="/do-with-ai" element={<DoWithAIPage />} />
           <Route path="/category/:categoryId" element={<CategoryPage />} />
           <Route path="/tool/:toolId" element={<ToolWorkspacePage />} />
           <Route path="/ai-assistant" element={<AIAssistantPage />} />

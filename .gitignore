@@ -6,3 +6,16 @@ dist-ssr/
 .idea/
 .DS_Store
 .env
+
+# Temporary report generator scripts and dumps
+*.docx
+~$*
+*.py
+*.ps1
+__pycache__/
+report_assets/
+extracted_images/
+extracted_ref_images/
+cep_uploaded_dump.json
+ref_doc_dump.json
+ds_full_text.txt

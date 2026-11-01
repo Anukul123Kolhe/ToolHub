@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ShieldCheck, Heart, Github, Lock, Cpu, Sparkles } from 'lucide-react';
+import { ShieldCheck, Heart, Lock, Cpu, Sparkles, Bot } from 'lucide-react';
 
 export const Footer: React.FC = () => {
   return (
@@ -68,8 +68,14 @@ export const Footer: React.FC = () => {
             </h4>
             <ul className="space-y-2 text-xs text-slate-600 dark:text-slate-400">
               <li>
+                <Link to="/do-with-ai" className="hover:text-blue-600 dark:hover:text-blue-400 flex items-center gap-1.5 transition-colors font-bold text-blue-600 dark:text-blue-400">
+                  <Sparkles className="w-3.5 h-3.5 text-blue-500 animate-pulse" />
+                  Do With AI (Workflow Engine)
+                </Link>
+              </li>
+              <li>
                 <Link to="/ai-assistant" className="hover:text-blue-600 dark:hover:text-blue-400 flex items-center gap-1.5 transition-colors">
-                  <Sparkles className="w-3.5 h-3.5 text-emerald-500" />
+                  <Bot className="w-3.5 h-3.5 text-slate-500" />
                   AI Task Assistant
                 </Link>
               </li>
